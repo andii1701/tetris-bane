@@ -10,6 +10,7 @@ pub fn main() {
     let window = video_subsystem
         .window("rust-sdl2 demo", 1024, 768)
         .position_centered()
+        .resizable()
         .build()
         .unwrap();
 
