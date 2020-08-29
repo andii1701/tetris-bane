@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::{Color, PixelFormatEnum};
+use sdl2::pixels::PixelFormatEnum;
 use sdl2::surface::Surface;
 
 fn render_weird_gradient(width: u64, height: u64) {
@@ -69,8 +69,15 @@ pub fn main() {
     )
     .unwrap();
 
-    canvas.set_draw_color(Color::RGB(0, 255, 255));
-    canvas.clear();
+    let texture_creator = canvas.texture_creator();
+
+    let texture = texture_creator
+        .create_texture_from_surface(surface)
+        .unwrap();
+
+    //canvas.set_draw_color(Color::RGB(0, 255, 255));
+    //canvas.clear();
+    canvas.copy(&texture, None, None);
     canvas.present();
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut i = 0;
