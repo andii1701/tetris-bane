@@ -5,38 +5,35 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::surface::Surface;
 
-fn render_weird_gradient(width: u64, height: u64) {
-    unsafe {
-        //let mut row: *mut u32 = buffer as *mut u32;
+static bytes_per_pixel: u32 = 4;
 
-        //let color32 =
-        //    (255 as u32) << 24 | (255 as u32) << 16 | (255 as u32) << 8 | (255 as u32) << 0;
-        //let foo2: u8 = 0;
-        //let foo3: u32 = color32;
-        //*row = foo3;
-        //let foo = 3;
-        //*pixel = color32;
+fn render_weird_gradient(width: u32, height: u32, pitch: u32) -> Vec<u8> {
+    let buffer_size = pitch * height;
+    let mut buffer: Vec<u8> = vec![0; buffer_size as usize];
+    //buffer[0] = 0;
+    //buffer[1] = 255;
+    //buffer[3] = 0;
+    //buffer[4] = 255;
 
-        /*let mut row: *mut u8 = buffer as *mut u8;
-
-        for y in 0..=height - 1 {
-            let mut pixelChannel: *const u8 = row;
-            for x in 0..=width - 1 {
-                let full: u8 = 255;
-                let zero: u8 = 0;
-                pixelChannel = &full; // R
-                pixelChannel = pixelChannel.offset(1);
-                pixelChannel = &zero; // G
-                pixelChannel = pixelChannel.offset(1);
-                pixelChannel = &zero; // B
-                pixelChannel = pixelChannel.offset(1);
-                // Alpha
-                pixelChannel = &zero;
-                pixelChannel = pixelChannel.offset(1);
-            }
+    let mut i = 0;
+    for y in 0..height {
+        for x in 0..width {
+            //R
+            buffer[i] = 0;
+            i += 1;
+            //G
+            buffer[i] = 255;
+            i += 1;
+            //B
+            buffer[i] = 0;
+            i += 1;
+            //A
+            buffer[i] = 255;
+            i += 1;
         }
-        row = row.offset(pitch as isize);*/
     }
+
+    buffer
 }
 
 pub fn main() {
@@ -54,11 +51,9 @@ pub fn main() {
     let mut canvas = window.into_canvas().accelerated().build().unwrap();
 
     let (width, height) = canvas.output_size().unwrap();
-
-    let bytes_per_pixel = 4;
     let pitch = width * bytes_per_pixel;
-    let buffer_size = pitch * height;
-    let mut buffer = vec![0; buffer_size as usize];
+
+    let mut buffer = render_weird_gradient(width, height, pitch);
 
     let surface = Surface::from_data(
         buffer.as_mut_slice(),
@@ -80,10 +75,8 @@ pub fn main() {
     canvas.copy(&texture, None, None);
     canvas.present();
     let mut event_pump = sdl_context.event_pump().unwrap();
-    let mut i = 0;
-    'running: loop {
-        i = (i + 1) % 255;
 
+    'running: loop {
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. }
