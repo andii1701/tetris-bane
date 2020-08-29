@@ -10,10 +10,6 @@ static bytes_per_pixel: u32 = 4;
 fn render_weird_gradient(width: u32, height: u32, pitch: u32) -> Vec<u8> {
     let buffer_size = pitch * height;
     let mut buffer: Vec<u8> = vec![0; buffer_size as usize];
-    //buffer[0] = 0;
-    //buffer[1] = 255;
-    //buffer[3] = 0;
-    //buffer[4] = 255;
 
     let mut i = 0;
     for y in 0..height {
@@ -22,10 +18,10 @@ fn render_weird_gradient(width: u32, height: u32, pitch: u32) -> Vec<u8> {
             buffer[i] = 0;
             i += 1;
             //G
-            buffer[i] = 255;
+            buffer[i] = y as u8;
             i += 1;
             //B
-            buffer[i] = 0;
+            buffer[i] = x as u8;
             i += 1;
             //A
             buffer[i] = 255;
