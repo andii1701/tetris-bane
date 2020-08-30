@@ -11,13 +11,11 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::surface::Surface;
 
-static mut buffer: *mut u8 = ptr::null_mut();
-
 use sdl2_sys::{SDL_CreateRGBSurfaceWithFormatFrom, SDL_PixelFormatEnum};
 
 static BYTES_PER_PIXEL: u32 = 4;
 
-fn render_weird_gradient(width: u32, height: u32, pitch: u32) {
+fn render_weird_gradient(buffer: *mut u8, width: u32, height: u32, pitch: u32) {
     unsafe {
         let mut row: *mut u8 = buffer;
 
@@ -65,11 +63,12 @@ pub fn main() {
     let pitch = width * BYTES_PER_PIXEL;
 
     let surface: Surface;
+    let buffer: *mut u8;
     unsafe {
         let buffer_size = pitch * height;
         buffer = libc::malloc(buffer_size as usize) as *mut u8;
 
-        render_weird_gradient(width, height, pitch);
+        render_weird_gradient(buffer, width, height, pitch);
         let surface_ptr = SDL_CreateRGBSurfaceWithFormatFrom(
             buffer as *mut c_void,
             width as i32,
