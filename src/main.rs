@@ -1,35 +1,50 @@
 use std::time::Duration;
 
+use std::ptr;
+
+use libc;
+
+use core::ffi::c_void; // TODO figure out which lib to use here
+use core::ptr::null_mut;
+
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::PixelFormatEnum;
 use sdl2::surface::Surface;
 
-static bytes_per_pixel: u32 = 4;
+static mut buffer: *mut u8 = ptr::null_mut();
 
-fn render_weird_gradient(width: u32, height: u32, pitch: u32) -> Vec<u8> {
-    let buffer_size = pitch * height;
-    let mut buffer: Vec<u8> = vec![0; buffer_size as usize];
+use sdl2_sys::{SDL_CreateRGBSurfaceWithFormatFrom, SDL_PixelFormatEnum};
 
-    let mut i = 0;
-    for y in 0..height {
-        for x in 0..width {
-            //R
-            buffer[i] = 0;
-            i += 1;
-            //G
-            buffer[i] = y as u8;
-            i += 1;
-            //B
-            buffer[i] = x as u8;
-            i += 1;
-            //A
-            buffer[i] = 255;
-            i += 1;
+static BYTES_PER_PIXEL: u32 = 4;
+
+fn render_weird_gradient(width: u32, height: u32, pitch: u32) {
+    unsafe {
+        let mut row: *mut u8 = buffer;
+
+        let mut i = 0;
+        for y in 0..height {
+            let mut pixelChannel: *mut u8 = row;
+            for x in 0..width {
+                //R
+                *pixelChannel = 0 as u8;
+
+                pixelChannel = pixelChannel.offset(1);
+                //G
+                *pixelChannel = y as u8;
+
+                pixelChannel = pixelChannel.offset(1);
+                //B
+                *pixelChannel = x as u8;
+
+                pixelChannel = pixelChannel.offset(1);
+                //A
+                *pixelChannel = 255;
+
+                pixelChannel = pixelChannel.offset(1);
+            }
+            row = row.offset(pitch as isize);
         }
     }
-
-    buffer
 }
 
 pub fn main() {
@@ -47,29 +62,33 @@ pub fn main() {
     let mut canvas = window.into_canvas().accelerated().build().unwrap();
 
     let (width, height) = canvas.output_size().unwrap();
-    let pitch = width * bytes_per_pixel;
+    let pitch = width * BYTES_PER_PIXEL;
 
-    let mut buffer = render_weird_gradient(width, height, pitch);
+    let surface: Surface;
+    unsafe {
+        let buffer_size = pitch * height;
+        buffer = libc::malloc(buffer_size as usize) as *mut u8;
 
-    let surface = Surface::from_data(
-        buffer.as_mut_slice(),
-        width,
-        height,
-        pitch,
-        PixelFormatEnum::RGBA32,
-    )
-    .unwrap();
-
+        render_weird_gradient(width, height, pitch);
+        let surface_ptr = SDL_CreateRGBSurfaceWithFormatFrom(
+            buffer as *mut c_void,
+            width as i32,
+            height as i32,
+            BYTES_PER_PIXEL as i32,
+            pitch as i32,
+            SDL_PixelFormatEnum::SDL_PIXELFORMAT_RGBA32 as u32,
+        );
+        surface = Surface::from_ll(surface_ptr);
+    }
     let texture_creator = canvas.texture_creator();
 
     let texture = texture_creator
         .create_texture_from_surface(surface)
         .unwrap();
 
-    //canvas.set_draw_color(Color::RGB(0, 255, 255));
-    //canvas.clear();
-    canvas.copy(&texture, None, None);
+    canvas.copy(&texture, None, None).unwrap();
     canvas.present();
+
     let mut event_pump = sdl_context.event_pump().unwrap();
 
     'running: loop {
