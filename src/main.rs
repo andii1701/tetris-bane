@@ -1,11 +1,8 @@
 use std::time::Duration;
 
-use std::ptr;
-
-use libc;
+use libc::malloc;
 
 use core::ffi::c_void; // TODO figure out which lib to use here
-use core::ptr::null_mut;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -19,26 +16,25 @@ fn render_weird_gradient(buffer: *mut u8, width: u32, height: u32, pitch: u32) {
     unsafe {
         let mut row: *mut u8 = buffer;
 
-        let mut i = 0;
         for y in 0..height {
-            let mut pixelChannel: *mut u8 = row;
+            let mut pixel_channel: *mut u8 = row;
             for x in 0..width {
                 //R
-                *pixelChannel = 0 as u8;
+                *pixel_channel = 0 as u8;
 
-                pixelChannel = pixelChannel.offset(1);
+                pixel_channel = pixel_channel.offset(1);
                 //G
-                *pixelChannel = y as u8;
+                *pixel_channel = y as u8;
 
-                pixelChannel = pixelChannel.offset(1);
+                pixel_channel = pixel_channel.offset(1);
                 //B
-                *pixelChannel = x as u8;
+                *pixel_channel = x as u8;
 
-                pixelChannel = pixelChannel.offset(1);
+                pixel_channel = pixel_channel.offset(1);
                 //A
-                *pixelChannel = 255;
+                *pixel_channel = 255;
 
-                pixelChannel = pixelChannel.offset(1);
+                pixel_channel = pixel_channel.offset(1);
             }
             row = row.offset(pitch as isize);
         }
@@ -66,7 +62,7 @@ pub fn main() {
     let buffer: *mut u8;
     unsafe {
         let buffer_size = pitch * height;
-        buffer = libc::malloc(buffer_size as usize) as *mut u8;
+        buffer = malloc(buffer_size as usize) as *mut u8;
 
         render_weird_gradient(buffer, width, height, pitch);
         let surface_ptr = SDL_CreateRGBSurfaceWithFormatFrom(
