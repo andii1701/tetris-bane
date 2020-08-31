@@ -34,6 +34,14 @@ fn render_weird_gradient(buffer: &mut Vec<u8>, width: u32, height: u32, x_offset
     }
 }
 
+fn fps_color(fps: u32) -> Color {
+    match fps {
+        0..=23 => Color::RGB(255, 0, 0),
+        24..=57 => Color::RGB(255, 255, 0),
+        _ => Color::RGB(0, 255, 0),
+    }
+}
+
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
     let ttf_context = sdl2::ttf::init().unwrap();
@@ -67,8 +75,8 @@ pub fn main() {
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut x_offset: u32 = 0;
-    let mut fps: String = " ".to_string();
-
+    let mut fps_string: String = " ".to_string();
+    let mut fps = 60;
     let mut timer = Instant::now();
 
     'running: loop {
@@ -104,21 +112,18 @@ pub fn main() {
         )
         .unwrap();
 
-        let font_surface = font
-            .render(&fps)
-            .blended(Color::RGBA(0, 255, 0, 255))
-            .unwrap();
+        let font_surface = font.render(&fps_string).blended(fps_color(fps)).unwrap();
         font_surface.blit(None, &mut surface, None).unwrap();
 
         let texture = surface.as_texture(&texture_creator).unwrap();
-
         canvas.copy(&texture, None, None).unwrap();
         canvas.present();
 
         if timer.elapsed().as_millis() > 333 {
             let end = timer_subsystem.performance_counter();
             let elapsed = (end - start) as f32 / timer_subsystem.performance_frequency() as f32;
-            fps = format!("fps: {:.0}", (1.0 / elapsed as f32));
+            fps = (1.0 / elapsed as f32) as u32;
+            fps_string = format!("fps: {}", fps);
             timer = Instant::now();
         }
     }
