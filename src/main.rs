@@ -1,13 +1,16 @@
-// TODO limit frame rate
-
-use std::time::Duration;
+use std::path::Path;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::PixelFormatEnum;
+use sdl2::pixels::{Color, PixelFormatEnum};
+use sdl2::rect::Rect;
 use sdl2::surface::Surface;
 
 static BYTES_PER_PIXEL: u32 = 4;
+
+static FONT_PATH: &str = "resources/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
+
+static OVERLAY_FONT_SIZE: u16 = 12;
 
 fn render_weird_gradient(buffer: &mut Vec<u8>, width: u32, height: u32, x_offset: u32) {
     let mut i = 0;
@@ -33,6 +36,11 @@ fn render_weird_gradient(buffer: &mut Vec<u8>, width: u32, height: u32, x_offset
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
+    let ttf_context = sdl2::ttf::init().unwrap();
+
+    let font_path: &Path = Path::new(FONT_PATH);
+    let font = ttf_context.load_font(font_path, OVERLAY_FONT_SIZE).unwrap();
+
     let video_subsystem = sdl_context.video().unwrap();
     let timer_subsystem = sdl_context.timer().unwrap();
 
@@ -43,8 +51,12 @@ pub fn main() {
         .build()
         .unwrap();
 
-    // TODO: Figure out what accelerated does
-    let mut canvas = window.into_canvas().accelerated().build().unwrap();
+    let mut canvas = window
+        .into_canvas()
+        .accelerated()
+        .present_vsync()
+        .build()
+        .unwrap();
 
     let (width, height) = canvas.output_size().unwrap();
     let pitch = width * BYTES_PER_PIXEL;
@@ -55,6 +67,7 @@ pub fn main() {
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut x_offset: u32 = 0;
+    let mut fps: String = " ".to_string();
     'running: loop {
         let start = timer_subsystem.performance_counter();
         for event in event_pump.poll_iter() {
@@ -79,7 +92,7 @@ pub fn main() {
 
         render_weird_gradient(&mut buffer, width, height, x_offset);
         x_offset += 1;
-        let surface = Surface::from_data(
+        let mut surface = Surface::from_data(
             buffer.as_mut_slice(),
             width,
             height,
@@ -87,6 +100,12 @@ pub fn main() {
             PixelFormatEnum::RGBA32,
         )
         .unwrap();
+
+        let mut font_surface = font
+            .render(&fps)
+            .blended(Color::RGBA(0, 255, 0, 255))
+            .unwrap();
+        font_surface.blit(None, &mut surface, None);
 
         let texture = surface.as_texture(&texture_creator).unwrap();
 
@@ -96,8 +115,6 @@ pub fn main() {
         //::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
         let end = timer_subsystem.performance_counter();
         let elapsed = (end - start) as f32 / timer_subsystem.performance_frequency() as f32;
-        if x_offset % 60 == 0 {
-            println!("fps: {}", (1.0 / elapsed as f32));
-        }
+        fps = format!("fps: {}", (1.0 / elapsed as f32));
     }
 }
