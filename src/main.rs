@@ -34,6 +34,7 @@ fn render_weird_gradient(buffer: &mut Vec<u8>, width: u32, height: u32, x_offset
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
+    let timer_subsystem = sdl_context.timer().unwrap();
 
     let window = video_subsystem
         .window("rust-tetris-sdl", 1024, 768)
@@ -55,6 +56,7 @@ pub fn main() {
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut x_offset: u32 = 0;
     'running: loop {
+        let start = timer_subsystem.performance_counter();
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. }
@@ -66,7 +68,7 @@ pub fn main() {
                     keycode: Some(Keycode::M),
                     ..
                 } => {
-                    x_offset += 1;
+                    //x_offset += 1;
                     println!("M");
                 }
 
@@ -76,7 +78,7 @@ pub fn main() {
         // The rest of the game loop goes here...
 
         render_weird_gradient(&mut buffer, width, height, x_offset);
-
+        x_offset += 1;
         let surface = Surface::from_data(
             buffer.as_mut_slice(),
             width,
@@ -91,6 +93,11 @@ pub fn main() {
         canvas.copy(&texture, None, None).unwrap();
         canvas.present();
 
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+        //::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+        let end = timer_subsystem.performance_counter();
+        let elapsed = (end - start) as f32 / timer_subsystem.performance_frequency() as f32;
+        if x_offset % 60 == 0 {
+            println!("fps: {}", (1.0 / elapsed as f32));
+        }
     }
 }
