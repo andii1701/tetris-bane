@@ -1,9 +1,9 @@
 use std::path::Path;
+use std::time::Instant;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::{Color, PixelFormatEnum};
-use sdl2::rect::Rect;
 use sdl2::surface::Surface;
 
 static BYTES_PER_PIXEL: u32 = 4;
@@ -68,6 +68,9 @@ pub fn main() {
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut x_offset: u32 = 0;
     let mut fps: String = " ".to_string();
+
+    let mut timer = Instant::now();
+
     'running: loop {
         let start = timer_subsystem.performance_counter();
         for event in event_pump.poll_iter() {
@@ -101,20 +104,22 @@ pub fn main() {
         )
         .unwrap();
 
-        let mut font_surface = font
+        let font_surface = font
             .render(&fps)
             .blended(Color::RGBA(0, 255, 0, 255))
             .unwrap();
-        font_surface.blit(None, &mut surface, None);
+        font_surface.blit(None, &mut surface, None).unwrap();
 
         let texture = surface.as_texture(&texture_creator).unwrap();
 
         canvas.copy(&texture, None, None).unwrap();
         canvas.present();
 
-        //::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
-        let end = timer_subsystem.performance_counter();
-        let elapsed = (end - start) as f32 / timer_subsystem.performance_frequency() as f32;
-        fps = format!("fps: {}", (1.0 / elapsed as f32));
+        if timer.elapsed().as_millis() > 333 {
+            let end = timer_subsystem.performance_counter();
+            let elapsed = (end - start) as f32 / timer_subsystem.performance_frequency() as f32;
+            fps = format!("fps: {:.0}", (1.0 / elapsed as f32));
+            timer = Instant::now();
+        }
     }
 }
