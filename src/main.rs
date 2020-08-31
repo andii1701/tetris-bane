@@ -78,6 +78,7 @@ pub fn main() {
     let mut fps_string: String = " ".to_string();
     let mut fps = 60;
     let mut timer = Instant::now();
+    let mut show_fps = true;
 
     'running: loop {
         let start = timer_subsystem.performance_counter();
@@ -89,11 +90,10 @@ pub fn main() {
                     ..
                 } => break 'running,
                 Event::KeyDown {
-                    keycode: Some(Keycode::M),
+                    keycode: Some(Keycode::F1),
                     ..
                 } => {
-                    //x_offset += 1;
-                    println!("M");
+                    show_fps = !show_fps;
                 }
 
                 _ => {}
@@ -111,9 +111,10 @@ pub fn main() {
             PixelFormatEnum::RGBA32,
         )
         .unwrap();
-
-        let font_surface = font.render(&fps_string).blended(fps_color(fps)).unwrap();
-        font_surface.blit(None, &mut surface, None).unwrap();
+        if show_fps {
+            let font_surface = font.render(&fps_string).blended(fps_color(fps)).unwrap();
+            font_surface.blit(None, &mut surface, None).unwrap();
+        }
 
         let texture = surface.as_texture(&texture_creator).unwrap();
         canvas.copy(&texture, None, None).unwrap();
