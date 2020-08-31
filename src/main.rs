@@ -1,9 +1,13 @@
+// TODO pack buffer info into a struct
+
 use std::path::Path;
 use std::time::Instant;
 
 use sdl2::event::Event;
+use sdl2::event::WindowEvent;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::{Color, PixelFormatEnum};
+//use sdl2::rect::Rect;
 use sdl2::surface::Surface;
 
 static BYTES_PER_PIXEL: u32 = 4;
@@ -32,6 +36,11 @@ fn render_weird_gradient(buffer: &mut Vec<u8>, width: u32, height: u32, x_offset
             i += 1;
         }
     }
+}
+
+fn rebuild_buffer(buffer: &mut Vec<u8>, height: u32, pitch: u32) {
+    let buffer_size = (pitch * height) as usize;
+    buffer.resize(buffer_size, 0);
 }
 
 fn fps_color(fps: u32) -> Color {
@@ -65,19 +74,18 @@ pub fn main() {
         .present_vsync()
         .build()
         .unwrap();
-
-    let (width, height) = canvas.output_size().unwrap();
-    let pitch = width * BYTES_PER_PIXEL;
-
-    let buffer_size = (pitch * height) as usize;
-    let mut buffer: Vec<u8> = vec![0; buffer_size as usize];
     let texture_creator = canvas.texture_creator();
+
+    let mut buffer: Vec<u8> = vec![0; 0];
+    let (mut width, mut height) = canvas.output_size().unwrap();
+    let mut pitch = width * BYTES_PER_PIXEL;
+    rebuild_buffer(&mut buffer, height, pitch);
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut x_offset: u32 = 0;
     let mut fps_string: String = " ".to_string();
     let mut fps = 60;
-    let mut timer = Instant::now();
+    let mut wallclock = Instant::now();
     let mut show_fps = true;
 
     'running: loop {
@@ -89,6 +97,15 @@ pub fn main() {
                     keycode: Some(Keycode::Escape),
                     ..
                 } => break 'running,
+                Event::Window {
+                    win_event: WindowEvent::Resized(new_width, new_height),
+                    ..
+                } => {
+                    width = new_width as u32;
+                    height = new_height as u32;
+                    pitch = width * BYTES_PER_PIXEL;
+                    rebuild_buffer(&mut buffer, height, pitch);
+                }
                 Event::KeyDown {
                     keycode: Some(Keycode::F1),
                     ..
@@ -120,12 +137,12 @@ pub fn main() {
         canvas.copy(&texture, None, None).unwrap();
         canvas.present();
 
-        if timer.elapsed().as_millis() > 333 {
+        if wallclock.elapsed().as_millis() > 333 {
             let end = timer_subsystem.performance_counter();
             let elapsed = (end - start) as f32 / timer_subsystem.performance_frequency() as f32;
             fps = (1.0 / elapsed as f32) as u32;
             fps_string = format!("fps: {}", fps);
-            timer = Instant::now();
+            wallclock = Instant::now();
         }
     }
 }
