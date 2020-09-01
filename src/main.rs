@@ -9,11 +9,13 @@ use sdl2::event::WindowEvent;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::{Color, PixelFormatEnum};
 //use sdl2::rect::Rect;
+use sdl2::mixer::{InitFlag, AUDIO_S16LSB, DEFAULT_CHANNELS};
 use sdl2::surface::Surface;
 
 static BYTES_PER_PIXEL: u32 = 4;
 
-static FONT_PATH: &str = "resources/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
+static FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
+static MUSIC_PATH: &str = "assets/music/music.ogg";
 
 static OVERLAY_FONT_SIZE: u16 = 12;
 
@@ -66,6 +68,14 @@ fn fps_color(fps: u32) -> Color {
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
     let ttf_context = sdl2::ttf::init().unwrap();
+
+    sdl_context.audio().unwrap();
+    sdl2::mixer::open_audio(44_100, AUDIO_S16LSB, DEFAULT_CHANNELS, 1_024).unwrap();
+    sdl2::mixer::init(InitFlag::OGG).unwrap();
+    sdl2::mixer::allocate_channels(2);
+
+    let music = sdl2::mixer::Music::from_file(MUSIC_PATH).unwrap();
+    music.play(1).unwrap();
 
     let font_path: &Path = Path::new(FONT_PATH);
     let font = ttf_context.load_font(font_path, OVERLAY_FONT_SIZE).unwrap();
