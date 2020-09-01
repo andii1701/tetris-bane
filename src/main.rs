@@ -1,4 +1,5 @@
 // TODO pack buffer info into a struct
+// TODO menu, with res options, vol control, full screen
 
 use std::path::Path;
 use std::time::Instant;
@@ -16,31 +17,42 @@ static FONT_PATH: &str = "resources/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf"
 
 static OVERLAY_FONT_SIZE: u16 = 12;
 
-fn render_weird_gradient(buffer: &mut Vec<u8>, width: u32, height: u32, x_offset: u32) {
+struct Buffer {
+    memory: Vec<u8>,
+    width: u32,
+    height: u32,
+    pitch: u32,
+}
+
+fn render_weird_gradient(buffer: &mut Buffer, x_offset: u32) {
     let mut i = 0;
-    for y in 0..height {
-        for x in 0..width {
+    for y in 0..buffer.height {
+        for x in 0..buffer.width {
             //R
-            buffer[i] = 0;
+            buffer.memory[i] = 0;
             i += 1;
 
             //G
-            buffer[i] = y as u8;
+            buffer.memory[i] = y as u8;
             i += 1;
 
             //B
-            buffer[i] = (x + x_offset) as u8;
+            buffer.memory[i] = (x + x_offset) as u8;
             i += 1;
             //A
-            buffer[i] = 255;
+            buffer.memory[i] = 255;
             i += 1;
         }
     }
 }
 
-fn rebuild_buffer(buffer: &mut Vec<u8>, height: u32, pitch: u32) {
-    let buffer_size = (pitch * height) as usize;
-    buffer.resize(buffer_size, 0);
+fn resize_buffer(buffer: &mut Buffer, width: u32, height: u32) {
+    buffer.width = width;
+    buffer.height = height;
+    buffer.pitch = width * BYTES_PER_PIXEL;
+    buffer
+        .memory
+        .resize((buffer.pitch * buffer.height) as usize, 0);
 }
 
 fn fps_color(fps: u32) -> Color {
@@ -76,10 +88,15 @@ pub fn main() {
         .unwrap();
     let texture_creator = canvas.texture_creator();
 
-    let mut buffer: Vec<u8> = vec![0; 0];
-    let (mut width, mut height) = canvas.output_size().unwrap();
-    let mut pitch = width * BYTES_PER_PIXEL;
-    rebuild_buffer(&mut buffer, height, pitch);
+    //let mut buffer: Vec<u8> =
+    let (width, height) = canvas.output_size().unwrap();
+    let pitch = width * BYTES_PER_PIXEL;
+    let mut buffer = Buffer {
+        memory: vec![0; (pitch * height) as usize],
+        width: width,
+        height: height,
+        pitch: pitch,
+    };
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut x_offset: u32 = 0;
@@ -98,13 +115,10 @@ pub fn main() {
                     ..
                 } => break 'running,
                 Event::Window {
-                    win_event: WindowEvent::Resized(new_width, new_height),
+                    win_event: WindowEvent::Resized(width, height),
                     ..
                 } => {
-                    width = new_width as u32;
-                    height = new_height as u32;
-                    pitch = width * BYTES_PER_PIXEL;
-                    rebuild_buffer(&mut buffer, height, pitch);
+                    resize_buffer(&mut buffer, width as u32, height as u32);
                 }
                 Event::KeyDown {
                     keycode: Some(Keycode::F1),
@@ -118,13 +132,13 @@ pub fn main() {
         }
         // The rest of the game loop goes here...
 
-        render_weird_gradient(&mut buffer, width, height, x_offset);
+        render_weird_gradient(&mut buffer, x_offset);
         x_offset += 1;
         let mut surface = Surface::from_data(
-            buffer.as_mut_slice(),
-            width,
-            height,
-            pitch,
+            buffer.memory.as_mut_slice(),
+            buffer.width,
+            buffer.height,
+            buffer.pitch,
             PixelFormatEnum::RGBA32,
         )
         .unwrap();
