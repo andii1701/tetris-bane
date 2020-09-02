@@ -1,4 +1,7 @@
-// TODO pack buffer info into a struct
+// TODO manual sound toglle
+// TODO volume control for sound
+// TODO volume control for music
+// TODO toggle music
 // TODO menu, with res options, vol control, full screen
 
 use std::path::Path;
@@ -15,6 +18,7 @@ use sdl2::surface::Surface;
 static BYTES_PER_PIXEL: u32 = 4;
 
 static FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
+static SOUND_PATH: &str = "assets/sounds/chirp.wav";
 static MUSIC_PATH: &str = "assets/music/music.ogg";
 
 static OVERLAY_FONT_SIZE: u16 = 12;
@@ -73,6 +77,10 @@ pub fn main() {
     sdl2::mixer::open_audio(44_100, AUDIO_S16LSB, DEFAULT_CHANNELS, 1_024).unwrap();
     sdl2::mixer::init(InitFlag::OGG).unwrap();
     sdl2::mixer::allocate_channels(2);
+
+    // Sound
+    let sound_chunk = sdl2::mixer::Chunk::from_file(SOUND_PATH).unwrap();
+    sdl2::mixer::Channel::all().play(&sound_chunk, 1).unwrap();
 
     let music = sdl2::mixer::Music::from_file(MUSIC_PATH).unwrap();
     music.play(1).unwrap();
