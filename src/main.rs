@@ -12,7 +12,8 @@ use sdl2::event::WindowEvent;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::{Color, PixelFormatEnum};
 //use sdl2::rect::Rect;
-use sdl2::mixer::{InitFlag, DEFAULT_CHANNELS, DEFAULT_FORMAT};
+use sdl2::mixer;
+use sdl2::mixer::Music;
 use sdl2::surface::Surface;
 
 static BYTES_PER_PIXEL: u32 = 4;
@@ -75,15 +76,17 @@ pub fn main() {
 
     sdl_context.audio().unwrap();
     // Very small chunk size of 64 seems to be needed to avoid audio lag
-    sdl2::mixer::open_audio(44_100, DEFAULT_FORMAT, DEFAULT_CHANNELS, 1024).unwrap();
-    sdl2::mixer::init(InitFlag::OGG).unwrap();
+    sdl2::mixer::open_audio(44_100, mixer::DEFAULT_FORMAT, mixer::DEFAULT_CHANNELS, 1024).unwrap();
+    sdl2::mixer::init(mixer::InitFlag::OGG).unwrap();
     sdl2::mixer::allocate_channels(2);
 
     // Sound
-    let sound_chunk = sdl2::mixer::Chunk::from_file(SOUND_PATH).unwrap();
+    let mut sound_chunk = sdl2::mixer::Chunk::from_file(SOUND_PATH).unwrap();
+    let mut sound_chunk_volume = sound_chunk.get_volume();
 
-    let music = sdl2::mixer::Music::from_file(MUSIC_PATH).unwrap();
+    let music = Music::from_file(MUSIC_PATH).unwrap();
     music.play(1).unwrap();
+    Music::pause();
 
     let font_path: &Path = Path::new(FONT_PATH);
     let font = ttf_context.load_font(font_path, OVERLAY_FONT_SIZE).unwrap();
@@ -106,7 +109,6 @@ pub fn main() {
         .unwrap();
     let texture_creator = canvas.texture_creator();
 
-    //let mut buffer: Vec<u8> =
     let (width, height) = canvas.output_size().unwrap();
     let pitch = width * BYTES_PER_PIXEL;
     let mut buffer = Buffer {
@@ -142,12 +144,29 @@ pub fn main() {
                     Some(Keycode::F1) => {
                         show_fps = !show_fps;
                     }
-                    Some(Keycode::S) => {
-                        println!("Here");
-                        match sdl2::mixer::Channel::all().play(&sound_chunk, 0) {
-                            Err(e) => println!("Error playing sound: {:?}", e),
-                            Ok(_) => {}
+                    Some(Keycode::S) => match mixer::Channel::all().play(&sound_chunk, 0) {
+                        Err(e) => println!("Error playing sound: {:?}", e),
+                        Ok(_) => {}
+                    },
+                    Some(Keycode::M) => match Music::is_paused() {
+                        true => Music::resume(),
+                        false => Music::pause(),
+                    },
+                    Some(Keycode::Minus) => Music::set_volume(Music::get_volume() - 8),
+                    Some(Keycode::Equals) => Music::set_volume(Music::get_volume() + 8),
+                    Some(Keycode::Num9) => {
+                        sound_chunk_volume -= 8;
+                        if sound_chunk_volume < 0 {
+                            sound_chunk_volume = 0;
                         }
+                        sound_chunk.set_volume(sound_chunk_volume);
+                    }
+                    Some(Keycode::Num0) => {
+                        sound_chunk_volume += 8;
+                        if sound_chunk_volume > 128 {
+                            sound_chunk_volume = 128;
+                        }
+                        sound_chunk.set_volume(sound_chunk_volume);
                     }
                     _ => {}
                 },
@@ -155,7 +174,6 @@ pub fn main() {
                 _ => {}
             }
         }
-        // The rest of the game loop goes here...
 
         render_weird_gradient(&mut buffer, x_offset);
         x_offset += 1;
