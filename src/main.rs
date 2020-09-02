@@ -1,5 +1,6 @@
 // TODO manual sound toglle
 // TODO volume control for sound
+// TODO check there are channels open before playing
 // TODO volume control for music
 // TODO toggle music
 // TODO menu, with res options, vol control, full screen
@@ -80,7 +81,6 @@ pub fn main() {
 
     // Sound
     let sound_chunk = sdl2::mixer::Chunk::from_file(SOUND_PATH).unwrap();
-    sdl2::mixer::Channel::all().play(&sound_chunk, 1).unwrap();
 
     let music = sdl2::mixer::Music::from_file(MUSIC_PATH).unwrap();
     music.play(1).unwrap();
@@ -138,12 +138,15 @@ pub fn main() {
                 } => {
                     resize_buffer(&mut buffer, width as u32, height as u32);
                 }
-                Event::KeyDown {
-                    keycode: Some(Keycode::F1),
-                    ..
-                } => {
-                    show_fps = !show_fps;
-                }
+                Event::KeyDown { keycode, .. } => match keycode {
+                    Some(Keycode::F1) => {
+                        show_fps = !show_fps;
+                    }
+                    Some(Keycode::S) => {
+                        sdl2::mixer::Channel::all().play(&sound_chunk, 1).unwrap();
+                    }
+                    _ => {}
+                },
 
                 _ => {}
             }
