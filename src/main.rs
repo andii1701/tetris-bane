@@ -1,9 +1,8 @@
-// TODO manual sound toglle
 // TODO volume control for sound
-// TODO check there are channels open before playing
 // TODO volume control for music
 // TODO toggle music
 // TODO menu, with res options, vol control, full screen
+// TODO debug output
 
 use std::path::Path;
 use std::time::Instant;
@@ -13,13 +12,13 @@ use sdl2::event::WindowEvent;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::{Color, PixelFormatEnum};
 //use sdl2::rect::Rect;
-use sdl2::mixer::{InitFlag, AUDIO_S16LSB, DEFAULT_CHANNELS};
+use sdl2::mixer::{InitFlag, DEFAULT_CHANNELS, DEFAULT_FORMAT};
 use sdl2::surface::Surface;
 
 static BYTES_PER_PIXEL: u32 = 4;
 
 static FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
-static SOUND_PATH: &str = "assets/sounds/chirp.wav";
+static SOUND_PATH: &str = "assets/sounds/chrip_44.wav";
 static MUSIC_PATH: &str = "assets/music/music.ogg";
 
 static OVERLAY_FONT_SIZE: u16 = 12;
@@ -75,7 +74,8 @@ pub fn main() {
     let ttf_context = sdl2::ttf::init().unwrap();
 
     sdl_context.audio().unwrap();
-    sdl2::mixer::open_audio(44_100, AUDIO_S16LSB, DEFAULT_CHANNELS, 1_024).unwrap();
+    // Very small chunk size of 64 seems to be needed to avoid audio lag
+    sdl2::mixer::open_audio(44_100, DEFAULT_FORMAT, DEFAULT_CHANNELS, 1024).unwrap();
     sdl2::mixer::init(InitFlag::OGG).unwrap();
     sdl2::mixer::allocate_channels(2);
 
@@ -143,7 +143,11 @@ pub fn main() {
                         show_fps = !show_fps;
                     }
                     Some(Keycode::S) => {
-                        sdl2::mixer::Channel::all().play(&sound_chunk, 1).unwrap();
+                        println!("Here");
+                        match sdl2::mixer::Channel::all().play(&sound_chunk, 0) {
+                            Err(e) => println!("Error playing sound: {:?}", e),
+                            Ok(_) => {}
+                        }
                     }
                     _ => {}
                 },
