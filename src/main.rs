@@ -10,57 +10,17 @@ use std::time::Instant;
 use sdl2::event::Event;
 use sdl2::event::WindowEvent;
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::{Color, PixelFormatEnum};
-//use sdl2::rect::Rect;
 use sdl2::mixer;
 use sdl2::mixer::Music;
+use sdl2::pixels::{Color, PixelFormatEnum};
+use sdl2::render::Canvas;
 use sdl2::surface::Surface;
-
-static BYTES_PER_PIXEL: u32 = 4;
 
 static FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
 static SOUND_PATH: &str = "assets/sounds/chrip_44.wav";
 static MUSIC_PATH: &str = "assets/music/music.ogg";
 
 static OVERLAY_FONT_SIZE: u16 = 12;
-
-struct Buffer {
-    memory: Vec<u8>,
-    width: u32,
-    height: u32,
-    pitch: u32,
-}
-
-fn render_weird_gradient(buffer: &mut Buffer, x_offset: u32) {
-    let mut i = 0;
-    for y in 0..buffer.height {
-        for x in 0..buffer.width {
-            //R
-            buffer.memory[i] = 0;
-            i += 1;
-
-            //G
-            buffer.memory[i] = y as u8;
-            i += 1;
-
-            //B
-            buffer.memory[i] = (x + x_offset) as u8;
-            i += 1;
-            //A
-            buffer.memory[i] = 255;
-            i += 1;
-        }
-    }
-}
-
-fn resize_buffer(buffer: &mut Buffer, width: u32, height: u32) {
-    buffer.width = width;
-    buffer.height = height;
-    buffer.pitch = width * BYTES_PER_PIXEL;
-    buffer
-        .memory
-        .resize((buffer.pitch * buffer.height) as usize, 0);
-}
 
 fn fps_color(fps: u32) -> Color {
     match fps {
@@ -110,16 +70,10 @@ pub fn main() {
     let texture_creator = canvas.texture_creator();
 
     let (width, height) = canvas.output_size().unwrap();
-    let pitch = width * BYTES_PER_PIXEL;
-    let mut buffer = Buffer {
-        memory: vec![0; (pitch * height) as usize],
-        width: width,
-        height: height,
-        pitch: pitch,
-    };
+
+    let mut surface = Surface::new(width, height, PixelFormatEnum::RGBA32).unwrap();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
-    let mut x_offset: u32 = 0;
     let mut fps_string: String = " ".to_string();
     let mut fps = 60;
     let mut wallclock = Instant::now();
@@ -135,11 +89,9 @@ pub fn main() {
                     ..
                 } => break 'running,
                 Event::Window {
-                    win_event: WindowEvent::Resized(width, height),
+                    win_event: WindowEvent::Resized(_width, _height),
                     ..
-                } => {
-                    resize_buffer(&mut buffer, width as u32, height as u32);
-                }
+                } => {}
                 Event::KeyDown { keycode, .. } => match keycode {
                     Some(Keycode::F1) => {
                         show_fps = !show_fps;
@@ -175,16 +127,11 @@ pub fn main() {
             }
         }
 
-        render_weird_gradient(&mut buffer, x_offset);
-        x_offset += 1;
-        let mut surface = Surface::from_data(
-            buffer.memory.as_mut_slice(),
-            buffer.width,
-            buffer.height,
-            buffer.pitch,
-            PixelFormatEnum::RGBA32,
-        )
-        .unwrap();
+        let mut canvas_surface = Canvas::from_surface(surface).unwrap();
+        canvas_surface.set_draw_color(Color::RGB(0, 0, 0));
+        canvas_surface.clear();
+        surface = canvas_surface.into_surface();
+
         if show_fps {
             let font_surface = font.render(&fps_string).blended(fps_color(fps)).unwrap();
             font_surface.blit(None, &mut surface, None).unwrap();
