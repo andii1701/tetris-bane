@@ -16,6 +16,8 @@ use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::render::Canvas;
 use sdl2::surface::Surface;
 
+mod game_sdl_layer;
+
 static FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
 static SOUND_PATH: &str = "assets/sounds/chrip_44.wav";
 static MUSIC_PATH: &str = "assets/music/music.ogg";
@@ -127,10 +129,7 @@ pub fn main() {
             }
         }
 
-        let mut canvas_surface = Canvas::from_surface(surface).unwrap();
-        canvas_surface.set_draw_color(Color::RGB(0, 0, 0));
-        canvas_surface.clear();
-        surface = canvas_surface.into_surface();
+        game_sdl_layer::update_and_render(&mut surface);
 
         if show_fps {
             let font_surface = font.render(&fps_string).blended(fps_color(fps)).unwrap();
