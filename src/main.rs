@@ -12,10 +12,9 @@ use sdl2::event::WindowEvent;
 use sdl2::keyboard::Keycode;
 use sdl2::mixer;
 use sdl2::mixer::Music;
-use sdl2::pixels::{Color, PixelFormatEnum};
-use sdl2::render::Canvas;
-use sdl2::surface::Surface;
+use sdl2::pixels::Color;
 
+use game_sdl_layer::InputEvent;
 mod game_sdl_layer;
 
 static FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
@@ -71,15 +70,15 @@ pub fn main() {
         .unwrap();
     let texture_creator = canvas.texture_creator();
 
-    let (width, height) = canvas.output_size().unwrap();
-
-    let mut surface = Surface::new(width, height, PixelFormatEnum::RGBA32).unwrap();
-
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut fps_string: String = " ".to_string();
     let mut fps = 60;
     let mut wallclock = Instant::now();
     let mut show_fps = true;
+
+    // TODO wrangle this into a simple ECS
+    let mut input_event: Option<game_sdl_layer::InputEvent> = None;
+    let mut position: game_sdl_layer::Position = game_sdl_layer::Position { x: 10, y: 10 };
 
     'running: loop {
         let start = timer_subsystem.performance_counter();
@@ -122,6 +121,18 @@ pub fn main() {
                         }
                         sound_chunk.set_volume(sound_chunk_volume);
                     }
+                    Some(Keycode::Up) => {
+                        input_event = Some(InputEvent::Up);
+                    }
+                    Some(Keycode::Down) => {
+                        input_event = Some(InputEvent::Down);
+                    }
+                    Some(Keycode::Left) => {
+                        input_event = Some(InputEvent::Left);
+                    }
+                    Some(Keycode::Right) => {
+                        input_event = Some(InputEvent::Right);
+                    }
                     _ => {}
                 },
 
@@ -129,15 +140,16 @@ pub fn main() {
             }
         }
 
-        game_sdl_layer::update_and_render(&mut surface);
+        game_sdl_layer::update_and_render(&mut canvas, &input_event, &mut position);
+
+        input_event = None;
 
         if show_fps {
             let font_surface = font.render(&fps_string).blended(fps_color(fps)).unwrap();
-            font_surface.blit(None, &mut surface, None).unwrap();
+            let texture = font_surface.as_texture(&texture_creator).unwrap();
+            canvas.copy(&texture, None, font_surface.rect()).unwrap();
         }
 
-        let texture = surface.as_texture(&texture_creator).unwrap();
-        canvas.copy(&texture, None, None).unwrap();
         canvas.present();
 
         if wallclock.elapsed().as_millis() > 333 {
