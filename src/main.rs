@@ -1,6 +1,3 @@
-// TODO volume control for sound
-// TODO volume control for music
-// TODO toggle music
 // TODO menu, with res options, vol control, full screen
 // TODO debug output
 
@@ -14,8 +11,9 @@ use sdl2::mixer;
 use sdl2::mixer::Music;
 use sdl2::pixels::Color;
 
-use game_sdl_layer::InputEvent;
 mod game_sdl_layer;
+
+mod game;
 
 static FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
 static SOUND_PATH: &str = "assets/sounds/chrip_44.wav";
@@ -77,8 +75,8 @@ pub fn main() {
     let mut show_fps = true;
 
     // TODO wrangle this into a simple ECS
-    let mut input_event: Option<game_sdl_layer::InputEvent> = None;
-    let mut position: game_sdl_layer::Position = game_sdl_layer::Position { x: 10, y: 10 };
+    let mut input_event: Option<game::InputEvent> = None;
+    let mut world = game::initialise();
 
     'running: loop {
         let start = timer_subsystem.performance_counter();
@@ -122,16 +120,16 @@ pub fn main() {
                         sound_chunk.set_volume(sound_chunk_volume);
                     }
                     Some(Keycode::Up) => {
-                        input_event = Some(InputEvent::Up);
+                        input_event = Some(game::InputEvent::Up);
                     }
                     Some(Keycode::Down) => {
-                        input_event = Some(InputEvent::Down);
+                        input_event = Some(game::InputEvent::Down);
                     }
                     Some(Keycode::Left) => {
-                        input_event = Some(InputEvent::Left);
+                        input_event = Some(game::InputEvent::Left);
                     }
                     Some(Keycode::Right) => {
-                        input_event = Some(InputEvent::Right);
+                        input_event = Some(game::InputEvent::Right);
                     }
                     _ => {}
                 },
@@ -140,7 +138,7 @@ pub fn main() {
             }
         }
 
-        game_sdl_layer::update_and_render(&mut canvas, &input_event, &mut position);
+        game_sdl_layer::update_and_render(&mut canvas, &input_event, &mut world);
 
         input_event = None;
 
