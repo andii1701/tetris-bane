@@ -1,6 +1,11 @@
 use std::time::Instant;
 
-pub static GRID_SIZE: u32 = 25;
+type Dimension = Position;
+
+pub static BLOCK_SIZE: i32 = 25;
+pub static GAP: i32 = 1;
+
+pub static BOARD_SIZE: Dimension = Dimension { x: 10, y: 20 };
 
 pub enum InputEvent {
     Left,

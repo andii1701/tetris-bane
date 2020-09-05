@@ -7,7 +7,7 @@ use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 
-use crate::game::{InputEvent, World, GRID_SIZE};
+use crate::game::{InputEvent, Position, World, BLOCK_SIZE, BOARD_SIZE, GAP};
 
 pub fn update_and_render(canvas: &mut WindowCanvas, event: &Option<InputEvent>, world: &mut World) {
     canvas.set_draw_color(Color::RGB(0, 0, 0));
@@ -15,27 +15,38 @@ pub fn update_and_render(canvas: &mut WindowCanvas, event: &Option<InputEvent>, 
 
     if let Some(event) = event {
         match event {
-            InputEvent::Left => world.position.x -= GRID_SIZE as i32,
-            InputEvent::Right => world.position.x += GRID_SIZE as i32,
+            InputEvent::Left => world.position.x -= BLOCK_SIZE,
+            InputEvent::Right => world.position.x += BLOCK_SIZE,
             _ => {}
         }
     }
 
     if world.block_drop_clock.elapsed().as_millis() > world.fall_rate_millis {
-        world.position.y += GRID_SIZE as i32;
+        world.position.y += BLOCK_SIZE as i32;
         world.block_drop_clock = Instant::now();
     }
 
     // Draw board
     canvas.set_draw_color(Color::RGB(50, 50, 50));
-    for y in 0..20 {
-        for x in 0..10 {
+    let (canvas_width, canvas_height) = canvas.output_size().unwrap();
+    let canvas_mid = Position {
+        x: (canvas_width as f32 / 2.) as i32,
+        y: (canvas_height as f32 / 2.) as i32,
+    };
+    let board_width = (BLOCK_SIZE + GAP) * BOARD_SIZE.x;
+    let board_height = (BLOCK_SIZE + GAP) * BOARD_SIZE.y;
+    let board_origin = Position {
+        x: canvas_mid.x - (board_width as f32 / 2.) as i32,
+        y: canvas_mid.y - (board_height as f32 / 2.) as i32,
+    };
+    for y in 0..BOARD_SIZE.y {
+        for x in 0..BOARD_SIZE.x {
             canvas
                 .fill_rect(Rect::new(
-                    100 + (GRID_SIZE as i32 + 2) * x,
-                    100 + (GRID_SIZE as i32 + 2) * y,
-                    GRID_SIZE,
-                    GRID_SIZE,
+                    board_origin.x + (BLOCK_SIZE + GAP) * x,
+                    board_origin.y + (BLOCK_SIZE + GAP) * y,
+                    BLOCK_SIZE as u32,
+                    BLOCK_SIZE as u32,
                 ))
                 .unwrap();
         }
@@ -46,8 +57,8 @@ pub fn update_and_render(canvas: &mut WindowCanvas, event: &Option<InputEvent>, 
         .fill_rect(Rect::new(
             world.position.x,
             world.position.y,
-            GRID_SIZE,
-            GRID_SIZE,
+            BLOCK_SIZE as u32,
+            BLOCK_SIZE as u32,
         ))
         .unwrap();
 }
