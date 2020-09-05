@@ -1,4 +1,6 @@
-pub static GRID_SIZE: u32 = 20;
+use std::time::Instant;
+
+pub static GRID_SIZE: u32 = 25;
 
 pub enum InputEvent {
     Left,
@@ -14,14 +16,15 @@ pub struct Position {
 
 pub struct World {
     pub position: Position,
-    pub fall_rate: f32, // elapsed seconds block take to fall
-    pub elapsed_time: f32,
+    pub fall_rate_millis: u128, // elapsed ms before blocks drop to next row
+
+    pub block_drop_clock: Instant,
 }
 
 pub fn initialise() -> World {
     World {
         position: Position { x: 10, y: 10 },
-        fall_rate: 0.5,
-        elapsed_time: 99.0,
+        fall_rate_millis: 500,
+        block_drop_clock: Instant::now(),
     }
 }

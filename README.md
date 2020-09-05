@@ -9,3 +9,5 @@ A simple Tetris clone written in Rust using SDL2
  * timers, frame capping etc https://thenumbat.github.io/cpp-course/sdl2/08/08.html
 
  * Another Rust tetris https://github.com/camccar/RustTetris
+
+ * Nice game boy tetris https://maxwell-umeshinon.itch.io/tetris

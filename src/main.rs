@@ -80,6 +80,7 @@ pub fn main() {
 
     'running: loop {
         let start = timer_subsystem.performance_counter();
+
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. }
