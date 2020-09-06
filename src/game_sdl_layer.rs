@@ -1,30 +1,21 @@
 // SDL layer for the game. Responsible for passing a rendered surface and sounds to be played
 // back to main loop.
 
-use std::time::Instant;
-
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 
+use crate::game;
 use crate::game::{InputEvent, Position, World, BLOCK_SIZE, BOARD_SIZE, GAP};
 
 pub fn update_and_render(canvas: &mut WindowCanvas, event: &Option<InputEvent>, world: &mut World) {
+    // update
+    game::update(event, world);
+
+    // render
+
     canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
-
-    if let Some(event) = event {
-        match event {
-            InputEvent::Left => world.position.x -= 1,
-            InputEvent::Right => world.position.x += 1,
-            _ => {}
-        }
-    }
-
-    if world.block_drop_clock.elapsed().as_millis() > world.fall_rate_millis {
-        world.position.y += 1;
-        world.block_drop_clock = Instant::now();
-    }
 
     // Draw board
     canvas.set_draw_color(Color::RGB(50, 50, 50));
@@ -52,6 +43,7 @@ pub fn update_and_render(canvas: &mut WindowCanvas, event: &Option<InputEvent>, 
         }
     }
 
+    // draw block
     canvas.set_draw_color(Color::RGB(255, 0, 0));
     canvas
         .fill_rect(Rect::new(

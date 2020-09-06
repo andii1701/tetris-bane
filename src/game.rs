@@ -33,3 +33,38 @@ pub fn initialise() -> World {
         block_drop_clock: Instant::now(),
     }
 }
+
+pub fn update(event: &Option<InputEvent>, world: &mut World) {
+    if let Some(event) = event {
+        match event {
+            InputEvent::Left => {
+                world.position = new_position(world.position.x - 1, world.position.y)
+            }
+
+            InputEvent::Right => {
+                world.position = new_position(world.position.x + 1, world.position.y)
+            }
+            _ => {}
+        }
+    }
+
+    if world.block_drop_clock.elapsed().as_millis() > world.fall_rate_millis {
+        world.position = new_position(world.position.x, world.position.y + 1);
+        world.block_drop_clock = Instant::now();
+    }
+}
+
+// Returns a new position, if the block cannot move there returns passed position
+fn new_position(x: i32, y: i32) -> Position {
+    let x = match x {
+        x if x < 0 => 0,
+        x if x > BOARD_SIZE.x - 1 => BOARD_SIZE.x - 1,
+        _ => x,
+    };
+    let y = match y {
+        y if y < 0 => 0,
+        y if y > BOARD_SIZE.y - 1 => BOARD_SIZE.y - 1,
+        _ => y,
+    };
+    Position { x, y }
+}
