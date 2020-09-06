@@ -28,7 +28,7 @@ pub struct World {
 
 pub fn initialise() -> World {
     World {
-        position: Position { x: 10, y: 10 },
+        position: Position { x: 0, y: 0 },
         fall_rate_millis: 500,
         block_drop_clock: Instant::now(),
     }

@@ -15,14 +15,14 @@ pub fn update_and_render(canvas: &mut WindowCanvas, event: &Option<InputEvent>, 
 
     if let Some(event) = event {
         match event {
-            InputEvent::Left => world.position.x -= BLOCK_SIZE,
-            InputEvent::Right => world.position.x += BLOCK_SIZE,
+            InputEvent::Left => world.position.x -= 1,
+            InputEvent::Right => world.position.x += 1,
             _ => {}
         }
     }
 
     if world.block_drop_clock.elapsed().as_millis() > world.fall_rate_millis {
-        world.position.y += BLOCK_SIZE as i32;
+        world.position.y += 1;
         world.block_drop_clock = Instant::now();
     }
 
@@ -55,8 +55,8 @@ pub fn update_and_render(canvas: &mut WindowCanvas, event: &Option<InputEvent>, 
     canvas.set_draw_color(Color::RGB(255, 0, 0));
     canvas
         .fill_rect(Rect::new(
-            world.position.x,
-            world.position.y,
+            board_origin.x + (BLOCK_SIZE + GAP) * world.position.x,
+            board_origin.y + (BLOCK_SIZE + GAP) * world.position.y,
             BLOCK_SIZE as u32,
             BLOCK_SIZE as u32,
         ))
