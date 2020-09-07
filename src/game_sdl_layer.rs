@@ -31,7 +31,7 @@ pub fn update_and_render(canvas: &mut WindowCanvas, event: &Option<InputEvent>, 
     for y in 0..BOARD_SIZE.y {
         for x in 0..BOARD_SIZE.x {
             match world.board[y as usize][x as usize] {
-                Some(color) => canvas.set_draw_color(Color::RGB(255, 50, 50)),
+                Some(color) => canvas.set_draw_color(game_color_to_sdl_color(color)),
                 None => canvas.set_draw_color(Color::RGB(50, 50, 50)),
             }
             canvas
@@ -44,4 +44,8 @@ pub fn update_and_render(canvas: &mut WindowCanvas, event: &Option<InputEvent>, 
                 .unwrap();
         }
     }
+}
+
+fn game_color_to_sdl_color(color: game::Color) -> Color {
+    Color::RGB(color.r, color.g, color.b)
 }

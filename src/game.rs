@@ -1,7 +1,7 @@
 use std::time::Instant;
 
 type Dimension = Position;
-
+type Board = [[Option<Color>; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize];
 pub static BLOCK_SIZE: i32 = 25;
 pub static GAP: i32 = 1;
 
@@ -21,9 +21,9 @@ pub struct Position {
 
 #[derive(Copy, Clone)]
 pub struct Color {
-    r: u8,
-    g: u8,
-    b: u8,
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
 }
 
 pub struct Block {
@@ -33,7 +33,7 @@ pub struct Block {
 
 pub struct World {
     pub block: Block,
-    pub board: [[Option<Color>; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize],
+    pub board: Board,
 
     pub fall_rate_millis: u128, // elapsed ms before blocks drop to next row
 
@@ -42,10 +42,11 @@ pub struct World {
 
 pub fn initialise() -> World {
     let mut board = [[None; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize];
-    let mut starting_block = Block {
-        positions: vec![Position { y: 0, x: 0 }],
+    let starting_block = Block {
+        positions: vec![Position { y: 0, x: 0 }, Position { y: 0, x: 1 }],
         color: Color { r: 0, g: 255, b: 0 },
     };
+    board_paint_block(&mut board, &starting_block);
     World {
         board: board,
         block: starting_block,
@@ -54,9 +55,15 @@ pub fn initialise() -> World {
     }
 }
 
+pub fn board_paint_block(board: &mut Board, block: &Block) {
+    for p in block.positions.iter() {
+        board[p.y as usize][p.x as usize] = Some(block.color);
+    }
+}
+
 pub fn update(event: &Option<InputEvent>, world: &mut World) {
     if world.block_drop_clock.elapsed().as_millis() > world.fall_rate_millis {
-        for mut position in world.block.positions.iter_mut() {
+        for position in world.block.positions.iter_mut() {
             let new_position = Position {
                 y: position.y + 1,
                 x: position.x,
