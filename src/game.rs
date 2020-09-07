@@ -13,7 +13,7 @@ pub enum InputEvent {
     Up,
     Down,
 }
-
+#[derive(Copy, Clone)]
 pub struct Position {
     pub x: i32,
     pub y: i32,
@@ -54,19 +54,19 @@ pub fn update(event: &Option<InputEvent>, world: &mut World) {
                                 //world.position = new_position(world.position.x - 1, world.position.y)
                             }
 
-                            InputEvent::Right => {
-                                let position = new_position(x + 1, y);
-                                let color = world.board[y as usize][x as usize];
-                                world.board[y as usize][x as usize] = None;
-                                world.board[position.y as usize][position.x as usize] = color;
-                            }
+                            InputEvent::Right => {}
                             _ => {}
                         }
                     }
 
                     if world.block_drop_clock.elapsed().as_millis() > world.fall_rate_millis {
-                        //world.position = new_position(world.position.x, world.position.y + 1);
-                        world.block_drop_clock = Instant::now();
+                        let new_position = Position { y: y + 1, x: x };
+                        if can_move_here(new_position) {
+                            let tmp = world.board[y as usize][x as usize];
+                            world.board[y as usize][x as usize] = None;
+                            world.board[new_position.y as usize][new_position.x as usize] = tmp;
+                            world.block_drop_clock = Instant::now();
+                        }
                     }
                 }
                 None => {}
@@ -74,17 +74,13 @@ pub fn update(event: &Option<InputEvent>, world: &mut World) {
         }
     }
 }
-// Returns a new position, if the block cannot move there returns passed position
-fn new_position(x: i32, y: i32) -> Position {
-    let x = match x {
-        x if x < 0 => 0,
-        x if x > BOARD_SIZE.x - 1 => BOARD_SIZE.x - 1,
-        _ => x,
-    };
-    let y = match y {
-        y if y < 0 => 0,
-        y if y > BOARD_SIZE.y - 1 => BOARD_SIZE.y - 1,
-        _ => y,
-    };
-    Position { x, y }
+//
+fn can_move_here(p: Position) -> bool {
+    if !(0..BOARD_SIZE.x).contains(&p.x) {
+        return false;
+    }
+    if !(0..BOARD_SIZE.y).contains(&p.y) {
+        return false;
+    }
+    true
 }
