@@ -13,12 +13,10 @@ pub fn update_and_render(canvas: &mut WindowCanvas, event: &Option<InputEvent>, 
     game::update(event, world);
 
     // render
-
     canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
 
     // Draw board
-    canvas.set_draw_color(Color::RGB(50, 50, 50));
     let (canvas_width, canvas_height) = canvas.output_size().unwrap();
     let canvas_mid = Position {
         x: (canvas_width as f32 / 2.) as i32,
@@ -32,6 +30,10 @@ pub fn update_and_render(canvas: &mut WindowCanvas, event: &Option<InputEvent>, 
     };
     for y in 0..BOARD_SIZE.y {
         for x in 0..BOARD_SIZE.x {
+            match world.board[y as usize][x as usize] {
+                Some(color) => canvas.set_draw_color(Color::RGB(255, 50, 50)),
+                None => canvas.set_draw_color(Color::RGB(50, 50, 50)),
+            }
             canvas
                 .fill_rect(Rect::new(
                     board_origin.x + (BLOCK_SIZE + GAP) * x,
@@ -42,15 +44,4 @@ pub fn update_and_render(canvas: &mut WindowCanvas, event: &Option<InputEvent>, 
                 .unwrap();
         }
     }
-
-    // draw block
-    canvas.set_draw_color(Color::RGB(255, 0, 0));
-    canvas
-        .fill_rect(Rect::new(
-            board_origin.x + (BLOCK_SIZE + GAP) * world.position.x,
-            board_origin.y + (BLOCK_SIZE + GAP) * world.position.y,
-            BLOCK_SIZE as u32,
-            BLOCK_SIZE as u32,
-        ))
-        .unwrap();
 }
