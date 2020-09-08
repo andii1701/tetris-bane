@@ -156,7 +156,7 @@ pub fn handle_move(delta: Delta, mut world: &mut World) {
         // Need to check if the block has finished falling before it's new positions
         // are painted to the board. Or internal block position will collide with
         // itself.
-        if block_finished_falling(&new_positions) {
+        if block_finished_falling(&world.board, &new_positions) {
             world.next_block = Some(generate_block());
         }
 
@@ -165,10 +165,15 @@ pub fn handle_move(delta: Delta, mut world: &mut World) {
     }
 }
 
-fn block_finished_falling(positions: &Vec<Position>) -> bool {
+fn block_finished_falling(board: &Board, positions: &Vec<Position>) -> bool {
     for position in positions.iter() {
         // Check at bottom of board
         if position.y == BOARD_SIZE.y - 1 {
+            return true;
+        }
+
+        // Check if anything is under the position
+        if is_occupied(board, *position + Delta { x: 0, y: 1 }) {
             return true;
         }
     }
@@ -183,4 +188,11 @@ fn can_move_here(p: Position) -> bool {
         return false;
     }
     true
+}
+
+fn is_occupied(board: &Board, position: Position) -> bool {
+    match board[position.y as usize][position.x as usize] {
+        Some(_) => true,
+        None => false,
+    }
 }
