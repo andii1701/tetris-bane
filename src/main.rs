@@ -120,20 +120,25 @@ pub fn main() {
                         sound_chunk.set_volume(sound_chunk_volume);
                     }
                     Some(Keycode::Up) => {
-                        input_event = Some(game::InputEvent::Up);
+                        input_event = Some(game::InputEvent::UpKeyDown);
                     }
                     Some(Keycode::Down) => {
-                        input_event = Some(game::InputEvent::Down);
+                        input_event = Some(game::InputEvent::DownKeyDown);
                     }
                     Some(Keycode::Left) => {
-                        input_event = Some(game::InputEvent::Left);
+                        input_event = Some(game::InputEvent::LeftKeyDown);
                     }
                     Some(Keycode::Right) => {
-                        input_event = Some(game::InputEvent::Right);
+                        input_event = Some(game::InputEvent::RightKeyDown);
                     }
                     _ => {}
                 },
-
+                Event::KeyUp { keycode, .. } => match keycode {
+                    Some(Keycode::Down) => {
+                        input_event = Some(game::InputEvent::DownKeyUp);
+                    }
+                    _ => {}
+                },
                 _ => {}
             }
         }

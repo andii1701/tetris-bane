@@ -4,16 +4,19 @@ use std::time::Instant;
 pub const BLOCK_SIZE: i32 = 25;
 pub const GAP: i32 = 1;
 pub const BOARD_SIZE: Dimension = Dimension { x: 10, y: 20 };
+pub const FAST_FALL_RATE: u128 = 100; // milliseconds
+pub const DEFAULT_FALL_RATE: u128 = 500; // milliseconds
 
 type Dimension = Position;
 type Delta = Position;
 type Board = [[Option<Color>; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize];
 
 pub enum InputEvent {
-    Left,
-    Right,
-    Up,
-    Down,
+    LeftKeyDown,
+    RightKeyDown,
+    UpKeyDown,
+    DownKeyDown,
+    DownKeyUp,
 }
 
 #[derive(Copy, Clone)]
@@ -76,7 +79,7 @@ pub fn initialise() -> World {
         board: board,
         block: starting_block,
         next_block: None,
-        fall_rate_millis: 500,
+        fall_rate_millis: DEFAULT_FALL_RATE,
         block_drop_clock: Instant::now(),
     }
 }
@@ -112,12 +115,18 @@ pub fn unpaint_positions(board: &mut Board, positions: &Vec<Position>) {
 pub fn update(event: &Option<InputEvent>, mut world: &mut World) {
     if let Some(event) = event {
         match event {
-            InputEvent::Left => {
+            InputEvent::LeftKeyDown => {
                 handle_move(Delta { y: 0, x: -1 }, &mut world);
             }
 
-            InputEvent::Right => {
+            InputEvent::RightKeyDown => {
                 handle_move(Delta { y: 0, x: 1 }, &mut world);
+            }
+            InputEvent::DownKeyDown => {
+                world.fall_rate_millis = FAST_FALL_RATE;
+            }
+            InputEvent::DownKeyUp => {
+                world.fall_rate_millis = DEFAULT_FALL_RATE;
             }
             _ => {}
         }
@@ -134,33 +143,33 @@ pub fn update(event: &Option<InputEvent>, mut world: &mut World) {
     }
 }
 
-pub fn handle_move(delta: Delta, mut world: &mut World) {
-    fn new_positions_from_delta(delta: Delta, block: &Block, board: &Board) -> Vec<Position> {
-        let mut new_positions: Vec<Position> = Vec::new();
-        for position in block.positions.iter() {
-            let new_position = *position + delta;
-            if !can_move_here(&board, new_position) {
-                new_positions.clear();
-                return new_positions;
-            }
-            new_positions.push(new_position);
-        }
-        new_positions
-    }
-
+fn handle_move(delta: Delta, mut world: &mut World) {
+    // Need to remove block from board, otherwise positions within the block
+    // collide with other positions in the same block.
     unpaint_positions(&mut world.board, &world.block.positions);
 
     let new_positions = new_positions_from_delta(delta, &world.block, &world.board);
     if !new_positions.is_empty() {
-        // Need to check if the block has finished falling before it's new positions
-        // are painted to the board. Or internal block position will collide with
-        // itself.
         if block_finished_falling(&world.board, &new_positions) {
             world.next_block = Some(generate_block());
         }
         world.block.positions = new_positions;
     }
+
     paint_positions(&mut world.board, &world.block.positions, world.block.color);
+}
+
+fn new_positions_from_delta(delta: Delta, block: &Block, board: &Board) -> Vec<Position> {
+    let mut new_positions: Vec<Position> = Vec::new();
+    for position in block.positions.iter() {
+        let new_position = *position + delta;
+        if !can_move_here(&board, new_position) {
+            new_positions.clear();
+            return new_positions;
+        }
+        new_positions.push(new_position);
+    }
+    new_positions
 }
 
 fn block_finished_falling(board: &Board, positions: &Vec<Position>) -> bool {
