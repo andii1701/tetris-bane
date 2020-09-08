@@ -111,9 +111,9 @@ pub fn attempt_to_move_block(delta: Delta, block: &mut Block, board: &mut Board)
 pub fn update(event: &Option<InputEvent>, world: &mut World) {
     if let Some(event) = event {
         match event {
-            InputEvent::Left => {}
+            InputEvent::Left => {attempt_to_move_block(Delta { y: 0, x: -1 }, &mut world.block, &mut world.board);}
 
-            InputEvent::Right => {}
+            InputEvent::Right => {attempt_to_move_block(Delta { y: 0, x: 1 }, &mut world.block, &mut world.board);}
             _ => {}
         }
     }
