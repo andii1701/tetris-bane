@@ -34,7 +34,6 @@ pub fn main() {
     let ttf_context = sdl2::ttf::init().unwrap();
 
     sdl_context.audio().unwrap();
-    // Very small chunk size of 64 seems to be needed to avoid audio lag
     sdl2::mixer::open_audio(44_100, mixer::DEFAULT_FORMAT, mixer::DEFAULT_CHANNELS, 1024).unwrap();
     sdl2::mixer::init(mixer::InitFlag::OGG).unwrap();
     sdl2::mixer::allocate_channels(2);
@@ -74,7 +73,6 @@ pub fn main() {
     let mut wallclock = Instant::now();
     let mut show_fps = true;
 
-    // TODO wrangle this into a simple ECS
     let mut input_event: Option<game::InputEvent> = None;
     let mut world = game::initialise();
 
