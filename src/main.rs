@@ -1,5 +1,6 @@
 // TODO menu, with res options, vol control, full screen
 // TODO debug output
+// TODO (optional) make it so with well times key presses you can slide block under other blocks.
 
 use std::path::Path;
 use std::time::Instant;

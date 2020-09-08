@@ -135,11 +135,11 @@ pub fn update(event: &Option<InputEvent>, mut world: &mut World) {
 }
 
 pub fn handle_move(delta: Delta, mut world: &mut World) {
-    fn new_positions_from_delta(delta: Delta, block: &Block) -> Vec<Position> {
+    fn new_positions_from_delta(delta: Delta, block: &Block, board: &Board) -> Vec<Position> {
         let mut new_positions: Vec<Position> = Vec::new();
         for position in block.positions.iter() {
             let new_position = *position + delta;
-            if !can_move_here(new_position) {
+            if !can_move_here(&board, new_position) {
                 new_positions.clear();
                 return new_positions;
             }
@@ -148,21 +148,19 @@ pub fn handle_move(delta: Delta, mut world: &mut World) {
         new_positions
     }
 
-    let new_positions = new_positions_from_delta(delta, &world.block);
+    unpaint_positions(&mut world.board, &world.block.positions);
 
+    let new_positions = new_positions_from_delta(delta, &world.block, &world.board);
     if !new_positions.is_empty() {
-        unpaint_positions(&mut world.board, &world.block.positions);
-
         // Need to check if the block has finished falling before it's new positions
         // are painted to the board. Or internal block position will collide with
         // itself.
         if block_finished_falling(&world.board, &new_positions) {
             world.next_block = Some(generate_block());
         }
-
         world.block.positions = new_positions;
-        paint_positions(&mut world.board, &world.block.positions, world.block.color);
     }
+    paint_positions(&mut world.board, &world.block.positions, world.block.color);
 }
 
 fn block_finished_falling(board: &Board, positions: &Vec<Position>) -> bool {
@@ -180,14 +178,14 @@ fn block_finished_falling(board: &Board, positions: &Vec<Position>) -> bool {
     false
 }
 
-fn can_move_here(p: Position) -> bool {
+fn can_move_here(board: &Board, p: Position) -> bool {
     if !(0..BOARD_SIZE.x).contains(&p.x) {
         return false;
     }
     if !(0..BOARD_SIZE.y).contains(&p.y) {
         return false;
     }
-    true
+    return !is_occupied(board, p);
 }
 
 fn is_occupied(board: &Board, position: Position) -> bool {
