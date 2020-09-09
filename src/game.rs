@@ -86,12 +86,11 @@ pub fn update(event: &Option<InputEvent>, mut world: &mut World) {
     }
 
     if world.block_drop_clock.elapsed().as_millis() > world.fall_rate_millis {
-        handle_move(Delta { y: 1, x: 0 }, world);
-
         if let Some(block) = &world.next_block {
             world.block = block.clone();
             world.next_block = None;
         }
+        handle_move(Delta { y: 1, x: 0 }, world);
         world.block_drop_clock = Instant::now();
     }
 }
