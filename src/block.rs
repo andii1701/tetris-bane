@@ -123,7 +123,7 @@ pub fn random() -> Block {
             color: Color {
                 r: 255,
                 g: 255,
-                b: 0,
+                b: 50,
             },
         },
         // Backwards L
@@ -148,7 +148,59 @@ pub fn random() -> Block {
             ],
             color: Color {
                 r: 255,
-                g: 0,
+                g: 50,
+                b: 255,
+            },
+        },
+        // Squiggle
+        Block {
+            positions: vec![
+                Position {
+                    y: 1,
+                    x: 0 + start_offset,
+                },
+                Position {
+                    y: 1,
+                    x: 1 + start_offset,
+                },
+                Position {
+                    y: 0,
+                    x: 1 + start_offset,
+                },
+                Position {
+                    y: 0,
+                    x: 2 + start_offset,
+                },
+            ],
+            color: Color {
+                r: 255,
+                g: 50,
+                b: 50,
+            },
+        },
+        // Backwards Squiggle
+        Block {
+            positions: vec![
+                Position {
+                    y: 0,
+                    x: 0 + start_offset,
+                },
+                Position {
+                    y: 0,
+                    x: 1 + start_offset,
+                },
+                Position {
+                    y: 1,
+                    x: 1 + start_offset,
+                },
+                Position {
+                    y: 1,
+                    x: 2 + start_offset,
+                },
+            ],
+            color: Color {
+                r: 255,
+                g: 255,
                 b: 255,
             },
         },
