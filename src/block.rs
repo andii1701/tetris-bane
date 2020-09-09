@@ -230,11 +230,59 @@ pub fn random() -> Block {
             },
         },
     ];
-    blocks.choose(&mut rand::thread_rng()).unwrap().clone()
+    //blocks.choose(&mut rand::thread_rng()).unwrap().clone()
+
+    Block {
+        label: Label::T,
+        positions: vec![
+            Position {
+                y: 0,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 2 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 1 + start_offset,
+            },
+        ],
+        color: Color {
+            r: 50,
+            g: 255,
+            b: 50,
+        },
+    }
 }
 
-fn rotate_block(block: &mut Block) {
-    match block.label {
-        _ => {}
+// Returns a new set of positions for the rotated block
+pub fn rotate_block(block: &mut Block) -> Vec<Position> {
+    let old_positions = block.positions.clone();
+    match &block.label {
+        Label::T => vec![
+            Position {
+                y: old_positions[0].y,
+                x: old_positions[0].x,
+            },
+            Position {
+                y: old_positions[1].y,
+                x: old_positions[1].x,
+            },
+            Position {
+                y: old_positions[2].y - 1,
+                x: old_positions[2].x - 1,
+            },
+            Position {
+                y: old_positions[3].y,
+                x: old_positions[3].x,
+            },
+        ],
+
+        _ => Vec::new(),
     }
 }

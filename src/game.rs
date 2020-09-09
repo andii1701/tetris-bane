@@ -160,5 +160,15 @@ fn is_occupied(board: &Board, position: Position) -> bool {
 }
 
 fn handle_rotate(world: &mut World) {
-    println!("Here");
+    unpaint_positions(&mut world.board, &world.block.positions);
+    let new_positions = block::rotate_block(&mut world.block);
+    for p in new_positions.iter() {
+        if !can_move_here(&world.board, *p) {
+            // XX Fix
+            paint_positions(&mut world.board, &world.block.positions, world.block.color);
+            return;
+        }
+    }
+    world.block.positions = new_positions;
+    paint_positions(&mut world.board, &world.block.positions, world.block.color);
 }

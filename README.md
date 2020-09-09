@@ -11,3 +11,5 @@ A simple Tetris clone written in Rust using SDL2
  * Another Rust tetris https://github.com/camccar/RustTetris
 
  * Nice game boy tetris https://maxwell-umeshinon.itch.io/tetris
+
+ * Nintendo rotation system https://tetris.fandom.com/wiki/Nintendo_Rotation_System
