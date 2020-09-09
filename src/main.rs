@@ -12,9 +12,9 @@ use sdl2::mixer;
 use sdl2::mixer::Music;
 use sdl2::pixels::Color;
 
-mod game_sdl_layer;
-
+mod block;
 mod game;
+mod game_sdl_layer;
 
 static FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
 static SOUND_PATH: &str = "assets/sounds/chrip_44.wav";

@@ -1,15 +1,16 @@
 use std::ops::Add;
 use std::time::Instant;
 
-pub const BLOCK_SIZE: i32 = 25;
-pub const GAP: i32 = 1;
+use crate::block;
+use crate::block::Position;
+
 pub const BOARD_SIZE: Dimension = Dimension { x: 10, y: 20 };
-pub const FAST_FALL_RATE: u128 = 100; // milliseconds
+pub const FAST_FALL_RATE: u128 = 50; // milliseconds
 pub const DEFAULT_FALL_RATE: u128 = 500; // milliseconds
 
 type Dimension = Position;
 type Delta = Position;
-type Board = [[Option<Color>; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize];
+type Board = [[Option<block::Color>; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize];
 
 pub enum InputEvent {
     LeftKeyDown,
@@ -17,12 +18,6 @@ pub enum InputEvent {
     UpKeyDown,
     DownKeyDown,
     DownKeyUp,
-}
-
-#[derive(Copy, Clone)]
-pub struct Position {
-    pub x: i32,
-    pub y: i32,
 }
 
 impl Add for Position {
@@ -36,22 +31,9 @@ impl Add for Position {
     }
 }
 
-#[derive(Copy, Clone)]
-pub struct Color {
-    pub r: u8,
-    pub g: u8,
-    pub b: u8,
-}
-
-#[derive(Clone)]
-pub struct Block {
-    positions: Vec<Position>,
-    color: Color,
-}
-
 pub struct World {
-    pub block: Block,
-    pub next_block: Option<Block>,
+    pub block: block::Block,
+    pub next_block: Option<block::Block>,
     pub board: Board,
 
     pub fall_rate_millis: u128, // elapsed ms before blocks drop to next row
@@ -61,19 +43,7 @@ pub struct World {
 
 pub fn initialise() -> World {
     let mut board = [[None; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize];
-    let starting_block = Block {
-        positions: vec![
-            Position { y: 0, x: 0 },
-            Position { y: 0, x: 1 },
-            Position { y: 0, x: 2 },
-            Position { y: 1, x: 1 },
-        ],
-        color: Color {
-            r: 50,
-            g: 255,
-            b: 50,
-        },
-    };
+    let starting_block = block::random();
     paint_positions(&mut board, &starting_block.positions, starting_block.color);
     World {
         board: board,
@@ -84,29 +54,13 @@ pub fn initialise() -> World {
     }
 }
 
-fn generate_block() -> Block {
-    Block {
-        positions: vec![
-            Position { y: 0, x: 0 },
-            Position { y: 0, x: 1 },
-            Position { y: 0, x: 2 },
-            Position { y: 0, x: 3 },
-        ],
-        color: Color {
-            r: 50,
-            g: 50,
-            b: 255,
-        },
-    }
-}
-
-pub fn paint_positions(board: &mut Board, positions: &Vec<Position>, color: Color) {
+fn paint_positions(board: &mut Board, positions: &Vec<Position>, color: block::Color) {
     for p in positions.iter() {
         board[p.y as usize][p.x as usize] = Some(color);
     }
 }
 
-pub fn unpaint_positions(board: &mut Board, positions: &Vec<Position>) {
+fn unpaint_positions(board: &mut Board, positions: &Vec<Position>) {
     for p in positions.iter() {
         board[p.y as usize][p.x as usize] = None;
     }
@@ -116,11 +70,10 @@ pub fn update(event: &Option<InputEvent>, mut world: &mut World) {
     if let Some(event) = event {
         match event {
             InputEvent::LeftKeyDown => {
-                handle_move(Delta { y: 0, x: -1 }, &mut world);
+                handle_move(Delta { y: 0, x: -1 }, world);
             }
-
             InputEvent::RightKeyDown => {
-                handle_move(Delta { y: 0, x: 1 }, &mut world);
+                handle_move(Delta { y: 0, x: 1 }, world);
             }
             InputEvent::DownKeyDown => {
                 world.fall_rate_millis = FAST_FALL_RATE;
@@ -133,7 +86,7 @@ pub fn update(event: &Option<InputEvent>, mut world: &mut World) {
     }
 
     if world.block_drop_clock.elapsed().as_millis() > world.fall_rate_millis {
-        handle_move(Delta { y: 1, x: 0 }, &mut world);
+        handle_move(Delta { y: 1, x: 0 }, world);
 
         if let Some(block) = &world.next_block {
             world.block = block.clone();
@@ -151,7 +104,7 @@ fn handle_move(delta: Delta, mut world: &mut World) {
     let new_positions = new_positions_from_delta(delta, &world.block, &world.board);
     if !new_positions.is_empty() {
         if block_finished_falling(&world.board, &new_positions) {
-            world.next_block = Some(generate_block());
+            world.next_block = Some(block::random());
         }
         world.block.positions = new_positions;
     }
@@ -159,7 +112,8 @@ fn handle_move(delta: Delta, mut world: &mut World) {
     paint_positions(&mut world.board, &world.block.positions, world.block.color);
 }
 
-fn new_positions_from_delta(delta: Delta, block: &Block, board: &Board) -> Vec<Position> {
+// Returns empty vec if block cannot be moved to the delta position.
+fn new_positions_from_delta(delta: Delta, block: &block::Block, board: &Board) -> Vec<Position> {
     let mut new_positions: Vec<Position> = Vec::new();
     for position in block.positions.iter() {
         let new_position = *position + delta;
@@ -174,12 +128,12 @@ fn new_positions_from_delta(delta: Delta, block: &Block, board: &Board) -> Vec<P
 
 fn block_finished_falling(board: &Board, positions: &Vec<Position>) -> bool {
     for position in positions.iter() {
-        // Check at bottom of board
+        // Check at bottom of board.
         if position.y == BOARD_SIZE.y - 1 {
             return true;
         }
 
-        // Check if anything is under the position
+        // Check if anything is under the position.
         if is_occupied(board, *position + Delta { x: 0, y: 1 }) {
             return true;
         }

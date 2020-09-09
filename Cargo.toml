@@ -1,13 +1,15 @@
 [package]
 name = "rust-tetris-sdl"
 version = "0.1.0"
-authors = ["Andrew Jones <andrew.jones@rea-group.com>"]
+authors = ["Andrew Jones <andy.larrymite@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[dependencies]
+rand = "0.7.3"
+
 [dependencies.sdl2]
 version = "0.34.3"
 default-features = false
-dev-dependencies = ["sdl2-mixer"]
 features = ["ttf", "mixer"]
