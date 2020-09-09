@@ -75,13 +75,15 @@ pub fn update(event: &Option<InputEvent>, mut world: &mut World) {
             InputEvent::RightKeyDown => {
                 handle_move(Delta { y: 0, x: 1 }, world);
             }
+            InputEvent::UpKeyDown => {
+                handle_rotate(world);
+            }
             InputEvent::DownKeyDown => {
                 world.fall_rate_millis = FAST_FALL_RATE;
             }
             InputEvent::DownKeyUp => {
                 world.fall_rate_millis = DEFAULT_FALL_RATE;
             }
-            _ => {}
         }
     }
 
@@ -155,4 +157,8 @@ fn is_occupied(board: &Board, position: Position) -> bool {
         Some(_) => true,
         None => false,
     }
+}
+
+fn handle_rotate(world: &mut World) {
+    println!("Here");
 }

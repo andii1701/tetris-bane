@@ -8,9 +8,34 @@ pub struct Color {
 }
 
 #[derive(Clone)]
+enum Label {
+    T,
+    // XXX
+    //  X
+    S,
+    //  XX
+    // XX
+    Z,
+    // XX
+    //  XX
+    L,
+    // XXX
+    // X
+    J,
+    // XXX
+    //   X
+    O,
+    // XX
+    // XX
+    I,
+    // XXXX
+}
+
+#[derive(Clone)]
 pub struct Block {
     pub positions: Vec<Position>,
     pub color: Color,
+    label: Label,
 }
 
 #[derive(Copy, Clone)]
@@ -22,8 +47,8 @@ pub struct Position {
 pub fn random() -> Block {
     let start_offset = 3;
     let blocks = vec![
-        // Line
         Block {
+            label: Label::I,
             positions: vec![
                 Position {
                     y: 0,
@@ -48,8 +73,8 @@ pub fn random() -> Block {
                 b: 255,
             },
         },
-        // Tee
         Block {
+            label: Label::T,
             positions: vec![
                 Position {
                     y: 0,
@@ -74,8 +99,8 @@ pub fn random() -> Block {
                 b: 50,
             },
         },
-        // square
         Block {
+            label: Label::O,
             positions: vec![
                 Position {
                     y: 0,
@@ -100,8 +125,8 @@ pub fn random() -> Block {
                 b: 255,
             },
         },
-        // L
         Block {
+            label: Label::L,
             positions: vec![
                 Position {
                     y: 0,
@@ -126,8 +151,8 @@ pub fn random() -> Block {
                 b: 50,
             },
         },
-        // Backwards L
         Block {
+            label: Label::J,
             positions: vec![
                 Position {
                     y: 0,
@@ -152,8 +177,8 @@ pub fn random() -> Block {
                 b: 255,
             },
         },
-        // Squiggle
         Block {
+            label: Label::S,
             positions: vec![
                 Position {
                     y: 1,
@@ -178,8 +203,8 @@ pub fn random() -> Block {
                 b: 50,
             },
         },
-        // Backwards Squiggle
         Block {
+            label: Label::Z,
             positions: vec![
                 Position {
                     y: 0,
@@ -206,4 +231,10 @@ pub fn random() -> Block {
         },
     ];
     blocks.choose(&mut rand::thread_rng()).unwrap().clone()
+}
+
+fn rotate_block(block: &mut Block) {
+    match block.label {
+        _ => {}
+    }
 }
