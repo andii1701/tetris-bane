@@ -190,7 +190,8 @@ fn delete_full_lines(world: &mut World) -> i32 {
     let mut count = 0;
     for (y, row) in world.board.to_vec().iter().enumerate() {
         if is_row_full(row.to_vec()) {
-            clear_row(&mut world.board, y);
+            world.board.remove(y);
+            world.board.insert(0, vec![None; BOARD_SIZE.x as usize]);
             count += 1;
         }
     }
@@ -200,10 +201,4 @@ fn delete_full_lines(world: &mut World) -> i32 {
 
 fn is_row_full(row: Vec<Option<block::Color>>) -> bool {
     !row.iter().any(|p| p.is_none())
-}
-
-fn clear_row(board: &mut Board, y: usize) {
-    for x in 0..BOARD_SIZE.x {
-        board[y as usize][x as usize] = None;
-    }
 }
