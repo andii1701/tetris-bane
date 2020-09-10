@@ -100,6 +100,7 @@ pub fn update(event: &Option<Input>, mut world: &mut World) {
             world.block = block.clone();
             world.next_block = None;
             world.block_orientation = 0;
+            world.fall_rate_millis = DEFAULT_FALL_RATE;
         }
         handle_move(Delta { y: 1, x: 0 }, world);
 
@@ -185,18 +186,27 @@ fn handle_rotate(world: &mut World) {
 }
 
 // Deletes full lines on board and returns te number of lines
-// deleted
+// deleted.
 fn delete_full_lines(world: &mut World) -> i32 {
     let mut count = 0;
-    for (y, row) in world.board.to_vec().iter().enumerate() {
-        if is_row_full(row.to_vec()) {
-            world.board.remove(y);
-            world.board.insert(0, vec![None; BOARD_SIZE.x as usize]);
-            count += 1;
-        }
+
+    let full_rows: Vec<usize> = world
+        .board
+        .iter()
+        .enumerate()
+        .filter(|(_, r)| is_row_full(r.to_vec()))
+        .map(|(i, _)| i)
+        .collect();
+
+    for index in &full_rows {
+        // Remove full row
+        world.board.remove(*index);
+        // insert new blank row at the top of the board
+        world.board.insert(0, vec![None; BOARD_SIZE.x as usize]);
     }
 
-    count
+    count += full_rows.len();
+    count as i32
 }
 
 fn is_row_full(row: Vec<Option<block::Color>>) -> bool {
