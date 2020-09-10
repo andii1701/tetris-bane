@@ -7,12 +7,12 @@ use crate::block::{Delta, Position};
 type Dimension = Position;
 
 pub const BOARD_SIZE: Dimension = Dimension { x: 10, y: 20 };
-pub const FAST_FALL_RATE: u128 = 50; // milliseconds
+pub const FAST_FALL_RATE: u128 = 25; // milliseconds
 pub const DEFAULT_FALL_RATE: u128 = 500; // milliseconds
 
 type Board = [[Option<block::Color>; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize];
 
-pub enum InputEvent {
+pub enum Input {
     LeftKeyDown,
     RightKeyDown,
     UpKeyDown,
@@ -68,25 +68,28 @@ fn unpaint_positions(board: &mut Board, positions: &Vec<Position>) {
     }
 }
 
-pub fn update(event: &Option<InputEvent>, mut world: &mut World) {
+pub fn update(event: &Option<Input>, mut world: &mut World) {
     if world.next_block.is_none() {
-        // Don't accept user input if a new block is spawned.
+        // Note: Don't accept user input if a new block is spawned.
         if let Some(event) = event {
             match event {
-                InputEvent::LeftKeyDown => {
+                // NOTE: DownKeyUp needs to be first in the match call otherwise
+                // the DownKeyUp event will be missed if the user is holding down
+                // another key.
+                Input::DownKeyUp => {
+                    world.fall_rate_millis = DEFAULT_FALL_RATE;
+                }
+                Input::LeftKeyDown => {
                     handle_move(Delta { y: 0, x: -1 }, world);
                 }
-                InputEvent::RightKeyDown => {
+                Input::RightKeyDown => {
                     handle_move(Delta { y: 0, x: 1 }, world);
                 }
-                InputEvent::UpKeyDown => {
+                Input::UpKeyDown => {
                     handle_rotate(world);
                 }
-                InputEvent::DownKeyDown => {
+                Input::DownKeyDown => {
                     world.fall_rate_millis = FAST_FALL_RATE;
-                }
-                InputEvent::DownKeyUp => {
-                    world.fall_rate_millis = DEFAULT_FALL_RATE;
                 }
             }
         }
@@ -99,12 +102,14 @@ pub fn update(event: &Option<InputEvent>, mut world: &mut World) {
             world.block_orientation = 0;
         }
         handle_move(Delta { y: 1, x: 0 }, world);
+
+        delete_full_lines(world);
         world.block_drop_clock = Instant::now();
     }
 }
 
 fn handle_move(delta: Delta, mut world: &mut World) {
-    // Need to remove block from board, otherwise positions within the block
+    // NOTE: Need to remove block from board, otherwise positions within the block
     // collide with other positions in the same block.
     unpaint_positions(&mut world.board, &world.block.positions);
 
@@ -177,4 +182,28 @@ fn handle_rotate(world: &mut World) {
     world.block.positions = new_positions;
     world.block_orientation = (world.block_orientation + 1) % 4;
     paint_positions(&mut world.board, &world.block.positions, world.block.color);
+}
+
+// Deletes full lines on board and returns te number of lines
+// deleted
+fn delete_full_lines(world: &mut World) -> i32 {
+    let mut count = 0;
+    for (y, row) in world.board.to_vec().iter().enumerate() {
+        if is_row_full(row.to_vec()) {
+            clear_row(&mut world.board, y);
+            count += 1;
+        }
+    }
+
+    count
+}
+
+fn is_row_full(row: Vec<Option<block::Color>>) -> bool {
+    !row.iter().any(|p| p.is_none())
+}
+
+fn clear_row(board: &mut Board, y: usize) {
+    for x in 0..BOARD_SIZE.x {
+        board[y as usize][x as usize] = None;
+    }
 }

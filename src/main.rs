@@ -74,7 +74,7 @@ pub fn main() {
     let mut wallclock = Instant::now();
     let mut show_fps = true;
 
-    let mut input_event: Option<game::InputEvent> = None;
+    let mut input_event: Option<game::Input> = None;
     let mut world = game::initialise();
 
     'running: loop {
@@ -120,22 +120,22 @@ pub fn main() {
                         sound_chunk.set_volume(sound_chunk_volume);
                     }
                     Some(Keycode::Up) => {
-                        input_event = Some(game::InputEvent::UpKeyDown);
+                        input_event = Some(game::Input::UpKeyDown);
                     }
                     Some(Keycode::Down) => {
-                        input_event = Some(game::InputEvent::DownKeyDown);
+                        input_event = Some(game::Input::DownKeyDown);
                     }
                     Some(Keycode::Left) => {
-                        input_event = Some(game::InputEvent::LeftKeyDown);
+                        input_event = Some(game::Input::LeftKeyDown);
                     }
                     Some(Keycode::Right) => {
-                        input_event = Some(game::InputEvent::RightKeyDown);
+                        input_event = Some(game::Input::RightKeyDown);
                     }
                     _ => {}
                 },
                 Event::KeyUp { keycode, .. } => match keycode {
                     Some(Keycode::Down) => {
-                        input_event = Some(game::InputEvent::DownKeyUp);
+                        input_event = Some(game::Input::DownKeyUp);
                     }
                     _ => {}
                 },

@@ -14,7 +14,7 @@ use crate::block;
 
 pub fn update_and_render(
     canvas: &mut WindowCanvas,
-    event: &Option<game::InputEvent>,
+    event: &Option<game::Input>,
     world: &mut game::World,
 ) {
     // update
