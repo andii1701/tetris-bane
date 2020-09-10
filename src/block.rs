@@ -49,7 +49,7 @@ pub struct Position {
     pub y: i32,
 }
 
-pub fn random() -> Block {
+pub fn spawn() -> Block {
     let start_offset = 3;
     let blocks = vec![
         Block {

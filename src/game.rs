@@ -10,7 +10,7 @@ pub const BOARD_SIZE: Dimension = Dimension { x: 10, y: 20 };
 pub const FAST_FALL_RATE: u128 = 25; // milliseconds
 pub const DEFAULT_FALL_RATE: u128 = 500; // milliseconds
 
-type Board = [[Option<block::Color>; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize];
+type Board = Vec<Vec<Option<block::Color>>>;
 
 pub enum Input {
     LeftKeyDown,
@@ -43,8 +43,8 @@ pub struct World {
 }
 
 pub fn initialise() -> World {
-    let mut board = [[None; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize];
-    let starting_block = block::random();
+    let mut board = vec![vec![None; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize];
+    let starting_block = block::spawn();
     paint_positions(&mut board, &starting_block.positions, starting_block.color);
     World {
         board: board,
@@ -116,7 +116,7 @@ fn handle_move(delta: Delta, mut world: &mut World) {
     let new_positions = new_positions_from_delta(delta, &world.block, &world.board);
     if !new_positions.is_empty() {
         if block_finished_falling(&world.board, &new_positions) {
-            world.next_block = Some(block::random());
+            world.next_block = Some(block::spawn());
         }
         world.block.positions = new_positions;
     }
