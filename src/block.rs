@@ -1,4 +1,9 @@
 use rand::seq::SliceRandom;
+use std::collections::HashMap;
+
+pub type Delta = Position;
+
+type RotationMap = HashMap<Label, Vec<Vec<Delta>>>;
 
 #[derive(Copy, Clone)]
 pub struct Color {
@@ -7,7 +12,7 @@ pub struct Color {
     pub b: u8,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 enum Label {
     T,
     // XXX
@@ -230,59 +235,178 @@ pub fn random() -> Block {
             },
         },
     ];
-    //blocks.choose(&mut rand::thread_rng()).unwrap().clone()
+    blocks.choose(&mut rand::thread_rng()).unwrap().clone()
+}
 
-    Block {
-        label: Label::T,
-        positions: vec![
-            Position {
-                y: 0,
-                x: 0 + start_offset,
-            },
-            Position {
-                y: 0,
-                x: 1 + start_offset,
-            },
-            Position {
-                y: 0,
-                x: 2 + start_offset,
-            },
-            Position {
-                y: 1,
-                x: 1 + start_offset,
-            },
+// This method of rotating the block relys on the order of the positions
+// defined in the block. It also needs to ensure that after 4 rotations all
+// positions are returned to their origional position. An alternative solution
+// would be to use a 2d array to represent the blocks and rotate the array.
+fn rotation_vectors() -> RotationMap {
+    let mut vectors: RotationMap = HashMap::new();
+
+    vectors.insert(
+        Label::T,
+        vec![
+            vec![
+                Delta { y: 0, x: 0 },
+                Delta { y: 0, x: 0 },
+                Delta { y: -1, x: -1 },
+                Delta { y: 0, x: 0 },
+            ],
+            vec![
+                Delta { y: 0, x: 0 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 0, x: 0 },
+                Delta { y: -1, x: 1 },
+            ],
+            vec![
+                Delta { y: 1, x: 1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 0, x: 0 },
+            ],
+            vec![
+                Delta { y: -1, x: -1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 1, x: 1 },
+                Delta { y: 1, x: -1 },
+            ],
         ],
-        color: Color {
-            r: 50,
-            g: 255,
-            b: 50,
-        },
-    }
+    );
+
+    vectors.insert(
+        Label::I,
+        vec![
+            vec![
+                Delta { y: -2, x: 2 },
+                Delta { y: -1, x: 1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 1, x: -1 },
+            ],
+            vec![
+                Delta { y: 2, x: -2 },
+                Delta { y: 1, x: -1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: -1, x: 1 },
+            ],
+        ],
+    );
+
+    vectors.insert(
+        Label::L,
+        vec![
+            vec![
+                Delta { y: -1, x: 0 },
+                Delta { y: 0, x: 0 },
+                Delta { y: -1, x: -1 },
+                Delta { y: 0, x: 1 },
+            ],
+            vec![
+                Delta { y: 1, x: 0 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 0, x: 1 },
+                Delta { y: -1, x: 1 },
+            ],
+            vec![
+                Delta { y: 1, x: 1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 0, x: -1 },
+                Delta { y: 1, x: 0 },
+            ],
+            vec![
+                Delta { y: -1, x: -1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 1, x: 1 },
+                Delta { y: 0, x: -2 },
+            ],
+        ],
+    );
+
+    vectors.insert(
+        Label::J,
+        vec![
+            vec![
+                Delta { y: -1, x: 1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 1, x: -1 },
+                Delta { y: 0, x: -2 },
+            ],
+            vec![
+                Delta { y: 0, x: -1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: -1, x: 1 },
+                Delta { y: -1, x: 0 },
+            ],
+            vec![
+                Delta { y: 0, x: 1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: -1, x: 0 },
+                Delta { y: 1, x: 1 },
+            ],
+            vec![
+                Delta { y: 1, x: -1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 1, x: 0 },
+                Delta { y: 0, x: 1 },
+            ],
+        ],
+    );
+
+    vectors.insert(
+        Label::S,
+        vec![
+            vec![
+                Delta { y: 0, x: 2 },
+                Delta { y: -2, x: 0 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 0, x: 0 },
+            ],
+            vec![
+                Delta { y: 0, x: -2 },
+                Delta { y: 2, x: 0 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 0, x: 0 },
+            ],
+        ],
+    );
+    vectors.insert(
+        Label::Z,
+        vec![
+            vec![
+                Delta { y: 2, x: 1 },
+                Delta { y: 0, x: 1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 0, x: 0 },
+            ],
+            vec![
+                Delta { y: -2, x: -1 },
+                Delta { y: 0, x: -1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 0, x: 0 },
+            ],
+        ],
+    );
+    vectors
 }
 
 // Returns a new set of positions for the rotated block
-pub fn rotate_block(block: &mut Block) -> Vec<Position> {
-    let old_positions = block.positions.clone();
-    match &block.label {
-        Label::T => vec![
-            Position {
-                y: old_positions[0].y,
-                x: old_positions[0].x,
-            },
-            Position {
-                y: old_positions[1].y,
-                x: old_positions[1].x,
-            },
-            Position {
-                y: old_positions[2].y - 1,
-                x: old_positions[2].x - 1,
-            },
-            Position {
-                y: old_positions[3].y,
-                x: old_positions[3].x,
-            },
-        ],
+pub fn rotate_block(block: &Block, orientation: u8) -> Vec<Position> {
+    let mut orientation = orientation;
 
-        _ => Vec::new(),
+    let rotv: RotationMap = rotation_vectors();
+
+    // special cases
+    match block.label {
+        Label::I | Label::S | Label::Z => orientation %= 2,
+        Label::O => return block.positions.clone(),
+        _ => {}
     }
+
+    block
+        .positions
+        .iter()
+        .enumerate()
+        .map(|(i, &p)| p + rotv[&block.label][orientation as usize][i])
+        .collect()
 }

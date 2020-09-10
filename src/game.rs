@@ -2,14 +2,14 @@ use std::ops::Add;
 use std::time::Instant;
 
 use crate::block;
-use crate::block::Position;
+use crate::block::{Delta, Position};
+
+type Dimension = Position;
 
 pub const BOARD_SIZE: Dimension = Dimension { x: 10, y: 20 };
 pub const FAST_FALL_RATE: u128 = 50; // milliseconds
 pub const DEFAULT_FALL_RATE: u128 = 500; // milliseconds
 
-type Dimension = Position;
-type Delta = Position;
 type Board = [[Option<block::Color>; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize];
 
 pub enum InputEvent {
@@ -34,6 +34,7 @@ impl Add for Position {
 pub struct World {
     pub block: block::Block,
     pub next_block: Option<block::Block>,
+    pub block_orientation: u8,
     pub board: Board,
 
     pub fall_rate_millis: u128, // elapsed ms before blocks drop to next row
@@ -48,6 +49,7 @@ pub fn initialise() -> World {
     World {
         board: board,
         block: starting_block,
+        block_orientation: 0,
         next_block: None,
         fall_rate_millis: DEFAULT_FALL_RATE,
         block_drop_clock: Instant::now(),
@@ -67,22 +69,25 @@ fn unpaint_positions(board: &mut Board, positions: &Vec<Position>) {
 }
 
 pub fn update(event: &Option<InputEvent>, mut world: &mut World) {
-    if let Some(event) = event {
-        match event {
-            InputEvent::LeftKeyDown => {
-                handle_move(Delta { y: 0, x: -1 }, world);
-            }
-            InputEvent::RightKeyDown => {
-                handle_move(Delta { y: 0, x: 1 }, world);
-            }
-            InputEvent::UpKeyDown => {
-                handle_rotate(world);
-            }
-            InputEvent::DownKeyDown => {
-                world.fall_rate_millis = FAST_FALL_RATE;
-            }
-            InputEvent::DownKeyUp => {
-                world.fall_rate_millis = DEFAULT_FALL_RATE;
+    if world.next_block.is_none() {
+        // Don't accept user input if a new block is spawned.
+        if let Some(event) = event {
+            match event {
+                InputEvent::LeftKeyDown => {
+                    handle_move(Delta { y: 0, x: -1 }, world);
+                }
+                InputEvent::RightKeyDown => {
+                    handle_move(Delta { y: 0, x: 1 }, world);
+                }
+                InputEvent::UpKeyDown => {
+                    handle_rotate(world);
+                }
+                InputEvent::DownKeyDown => {
+                    world.fall_rate_millis = FAST_FALL_RATE;
+                }
+                InputEvent::DownKeyUp => {
+                    world.fall_rate_millis = DEFAULT_FALL_RATE;
+                }
             }
         }
     }
@@ -91,6 +96,7 @@ pub fn update(event: &Option<InputEvent>, mut world: &mut World) {
         if let Some(block) = &world.next_block {
             world.block = block.clone();
             world.next_block = None;
+            world.block_orientation = 0;
         }
         handle_move(Delta { y: 1, x: 0 }, world);
         world.block_drop_clock = Instant::now();
@@ -161,14 +167,14 @@ fn is_occupied(board: &Board, position: Position) -> bool {
 
 fn handle_rotate(world: &mut World) {
     unpaint_positions(&mut world.board, &world.block.positions);
-    let new_positions = block::rotate_block(&mut world.block);
+    let new_positions = block::rotate_block(&mut world.block, world.block_orientation);
     for p in new_positions.iter() {
         if !can_move_here(&world.board, *p) {
-            // XX Fix
             paint_positions(&mut world.board, &world.block.positions, world.block.color);
             return;
         }
     }
     world.block.positions = new_positions;
+    world.block_orientation = (world.block_orientation + 1) % 4;
     paint_positions(&mut world.board, &world.block.positions, world.block.color);
 }
