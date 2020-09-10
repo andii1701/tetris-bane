@@ -40,6 +40,8 @@ pub struct World {
     pub fall_rate_millis: u128, // elapsed ms before blocks drop to next row
 
     pub block_drop_clock: Instant,
+
+    pub score: i32,
 }
 
 pub fn initialise() -> World {
@@ -53,6 +55,7 @@ pub fn initialise() -> World {
         next_block: None,
         fall_rate_millis: DEFAULT_FALL_RATE,
         block_drop_clock: Instant::now(),
+        score: 0,
     }
 }
 
@@ -69,6 +72,7 @@ fn unpaint_positions(board: &mut Board, positions: &Vec<Position>) {
 }
 
 pub fn update(event: &Option<Input>, mut world: &mut World) {
+    let mut delta = Delta { x: 0, y: 0 };
     if world.next_block.is_none() {
         // Note: Don't accept user input if a new block is spawned.
         if let Some(event) = event {
@@ -80,10 +84,10 @@ pub fn update(event: &Option<Input>, mut world: &mut World) {
                     world.fall_rate_millis = DEFAULT_FALL_RATE;
                 }
                 Input::LeftKeyDown => {
-                    handle_move(Delta { y: 0, x: -1 }, world);
+                    delta = Delta { y: 0, x: -1 };
                 }
                 Input::RightKeyDown => {
-                    handle_move(Delta { y: 0, x: 1 }, world);
+                    delta = Delta { y: 0, x: 1 };
                 }
                 Input::UpKeyDown => {
                     handle_rotate(world);
@@ -92,6 +96,7 @@ pub fn update(event: &Option<Input>, mut world: &mut World) {
                     world.fall_rate_millis = FAST_FALL_RATE;
                 }
             }
+            handle_move(delta, world);
         }
     }
 
@@ -101,10 +106,11 @@ pub fn update(event: &Option<Input>, mut world: &mut World) {
             world.next_block = None;
             world.block_orientation = 0;
             world.fall_rate_millis = DEFAULT_FALL_RATE;
+            world.score += delete_full_lines(world);
         }
-        handle_move(Delta { y: 1, x: 0 }, world);
-
-        delete_full_lines(world);
+        delta = Delta { y: 1, x: 0 };
+        handle_move(delta, world);
+        //print("{}", world.score);
         world.block_drop_clock = Instant::now();
     }
 }
