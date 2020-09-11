@@ -2,7 +2,7 @@ use std::ops::Add;
 use std::time::Instant;
 
 use crate::block;
-use crate::block::{Delta, Position};
+use crate::block::{Block, Delta, Position};
 
 type Dimension = Position;
 
@@ -71,8 +71,7 @@ fn unpaint_positions(board: &mut Board, positions: &Vec<Position>) {
     }
 }
 
-pub fn update(event: &Option<Input>, mut world: &mut World) {
-    let mut delta = Delta { x: 0, y: 0 };
+pub fn update(event: &Option<Input>, world: &mut World) {
     if world.next_block.is_none() {
         // Note: Don't accept user input if a new block is spawned.
         if let Some(event) = event {
@@ -84,10 +83,10 @@ pub fn update(event: &Option<Input>, mut world: &mut World) {
                     world.fall_rate_millis = DEFAULT_FALL_RATE;
                 }
                 Input::LeftKeyDown => {
-                    delta = Delta { y: 0, x: -1 };
+                    handle_move(Delta { y: 0, x: -1 }, &mut world.block, &mut world.board);
                 }
                 Input::RightKeyDown => {
-                    delta = Delta { y: 0, x: 1 };
+                    handle_move(Delta { y: 0, x: 1 }, &mut world.block, &mut world.board);
                 }
                 Input::UpKeyDown => {
                     handle_rotate(world);
@@ -96,7 +95,6 @@ pub fn update(event: &Option<Input>, mut world: &mut World) {
                     world.fall_rate_millis = FAST_FALL_RATE;
                 }
             }
-            handle_move(delta, world);
         }
     }
 
@@ -108,27 +106,27 @@ pub fn update(event: &Option<Input>, mut world: &mut World) {
             world.fall_rate_millis = DEFAULT_FALL_RATE;
             world.score += delete_full_lines(world);
         }
-        delta = Delta { y: 1, x: 0 };
-        handle_move(delta, world);
-        //print("{}", world.score);
+        world.next_block = handle_move(Delta { y: 1, x: 0 }, &mut world.block, &mut world.board);
         world.block_drop_clock = Instant::now();
     }
 }
 
-fn handle_move(delta: Delta, mut world: &mut World) {
+fn handle_move(delta: Delta, mut block: &mut Block, mut board: &mut Board) -> Option<Block> {
     // NOTE: Need to remove block from board, otherwise positions within the block
     // collide with other positions in the same block.
-    unpaint_positions(&mut world.board, &world.block.positions);
+    let mut next_block: Option<Block> = None;
+    unpaint_positions(&mut board, &block.positions);
 
-    let new_positions = new_positions_from_delta(delta, &world.block, &world.board);
+    let new_positions = new_positions_from_delta(delta, &block, &board);
     if !new_positions.is_empty() {
-        if block_finished_falling(&world.board, &new_positions) {
-            world.next_block = Some(block::spawn());
+        if block_finished_falling(&board, &new_positions) {
+            next_block = Some(block::spawn());
         }
-        world.block.positions = new_positions;
+        block.positions = new_positions;
     }
 
-    paint_positions(&mut world.board, &world.block.positions, world.block.color);
+    paint_positions(&mut board, &block.positions, block.color);
+    next_block
 }
 
 // Returns empty vec if block cannot be moved to the delta position.
