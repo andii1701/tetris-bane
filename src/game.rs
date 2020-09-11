@@ -1,3 +1,35 @@
+/*
+
+The way the game works.
+
+The "board" is represented by a double subscript array of Vecs.  Each
+position on the board is an Option<Color>. If the Color is None then
+the position is blank otherwise that Color is drawn in the positions.
+
+Each Tetris Block consists of a Vec of positions and a Color. A
+Position has a X and Y component. The block positions are "painted" on
+the board each game loop.
+
+During the each game loop when the Block is moved or rotated by the
+player or the block "falls". The block is removed from the board, then
+the Block's positions are updated and each position is checked to see
+if the move is possible. If the move is possible the new positions are
+assigned to the Block. Otherwise the new positions are
+discarded. After movement logic is completed the Block's positions are
+re-painted on the Board.
+
+The advantage of this approach is that each position in the Block can
+be treated independently with concern for other positions in the
+block. It also make rendering simple as the render only has to render
+the board. The disadvantage is that you have to remember to unpaint
+and re-paint the block before and after each move is attempted.
+
+Before the block "falls" one square a check is done to see if the
+Block has finished falling. If the block has finished falling a new
+block is spawned, complete lines are removed.
+
+*/
+
 use std::ops::Add;
 use std::time::Instant;
 
@@ -95,7 +127,7 @@ pub fn update(event: &Option<Input>, world: &mut World) {
         world.block_drop_clock = Instant::now();
 
         // NOTE: We want to handle if the block has finished falling in
-        // the elapsed time check as gives the user an chance
+        // the elapsed time check as it gives the player a chance
         // to quickly move the block at the last split second and "wedge" it into
         // gaps.
         if has_block_finished_falling(&mut world.board, &world.block) {
