@@ -33,7 +33,6 @@ impl Add for Position {
 
 pub struct World {
     pub block: block::Block,
-    pub next_block: Option<block::Block>,
     pub block_orientation: u8,
     pub board: Board,
 
@@ -52,7 +51,6 @@ pub fn initialise() -> World {
         board: board,
         block: starting_block,
         block_orientation: 0,
-        next_block: None,
         fall_rate_millis: DEFAULT_FALL_RATE,
         block_drop_clock: Instant::now(),
         score: 0,
@@ -72,61 +70,60 @@ fn unpaint_positions(board: &mut Board, positions: &Vec<Position>) {
 }
 
 pub fn update(event: &Option<Input>, world: &mut World) {
-    if world.next_block.is_none() {
-        // Note: Don't accept user input if a new block is spawned.
-        if let Some(event) = event {
-            match event {
-                // NOTE: DownKeyUp needs to be first in the match call otherwise
-                // the DownKeyUp event will be missed if the user is holding down
-                // another key.
-                Input::DownKeyUp => {
-                    world.fall_rate_millis = DEFAULT_FALL_RATE;
-                }
-                Input::LeftKeyDown => {
-                    handle_move(Delta { y: 0, x: -1 }, &mut world.block, &mut world.board);
-                }
-                Input::RightKeyDown => {
-                    handle_move(Delta { y: 0, x: 1 }, &mut world.block, &mut world.board);
-                }
-                Input::UpKeyDown => {
-                    handle_rotate(world);
-                }
-                Input::DownKeyDown => {
-                    world.fall_rate_millis = FAST_FALL_RATE;
-                }
+    // NOTE: Don't accept user input if a new block is spawned.
+    if let Some(event) = event {
+        match event {
+            // NOTE: DownKeyUp needs to be first in the match call otherwise
+            // the DownKeyUp event will be missed if the user is holding down
+            // another key.
+            Input::DownKeyUp => {
+                world.fall_rate_millis = DEFAULT_FALL_RATE;
+            }
+            Input::LeftKeyDown => {
+                handle_move(Delta { y: 0, x: -1 }, &mut world.block, &mut world.board);
+            }
+            Input::RightKeyDown => {
+                handle_move(Delta { y: 0, x: 1 }, &mut world.block, &mut world.board);
+            }
+            Input::UpKeyDown => {
+                handle_rotate(world);
+            }
+            Input::DownKeyDown => {
+                world.fall_rate_millis = FAST_FALL_RATE;
             }
         }
     }
 
     if world.block_drop_clock.elapsed().as_millis() > world.fall_rate_millis {
-        if let Some(block) = &world.next_block {
-            world.block = block.clone();
-            world.next_block = None;
+        world.block_drop_clock = Instant::now();
+
+        // NOTE: We want to handle checking if the block has finished falling in
+        // the elapsed time check. Because this gives the user an chance
+        // to quickly move the block at the last split second and "wedge" it into
+        // gaps.
+        if has_block_finished_falling(&mut world.board, &world.block) {
+            world.block = block::spawn();
             world.block_orientation = 0;
             world.fall_rate_millis = DEFAULT_FALL_RATE;
             world.score += delete_full_lines(world);
+            return;
         }
-        world.next_block = handle_move(Delta { y: 1, x: 0 }, &mut world.block, &mut world.board);
-        world.block_drop_clock = Instant::now();
+        // Move block one square down.
+        handle_move(Delta { y: 1, x: 0 }, &mut world.block, &mut world.board);
     }
 }
 
-fn handle_move(delta: Delta, mut block: &mut Block, mut board: &mut Board) -> Option<Block> {
+fn handle_move(delta: Delta, mut block: &mut Block, mut board: &mut Board) {
     // NOTE: Need to remove block from board, otherwise positions within the block
     // collide with other positions in the same block.
-    let mut next_block: Option<Block> = None;
     unpaint_positions(&mut board, &block.positions);
 
     let new_positions = new_positions_from_delta(delta, &block, &board);
     if !new_positions.is_empty() {
-        if block_finished_falling(&board, &new_positions) {
-            next_block = Some(block::spawn());
-        }
         block.positions = new_positions;
     }
 
     paint_positions(&mut board, &block.positions, block.color);
-    next_block
 }
 
 // Returns empty vec if block cannot be moved to the delta position.
@@ -143,19 +140,30 @@ fn new_positions_from_delta(delta: Delta, block: &block::Block, board: &Board) -
     new_positions
 }
 
-fn block_finished_falling(board: &Board, positions: &Vec<Position>) -> bool {
-    for position in positions.iter() {
+fn has_block_finished_falling(mut board: &mut Board, block: &Block) -> bool {
+    // NOTE: Need to remove block from board, otherwise positions within the block
+    // collide with other positions in the same block.
+    unpaint_positions(&mut board, &block.positions);
+
+    let mut ret_val = false;
+    for position in block.positions.iter() {
         // Check at bottom of board.
         if position.y == BOARD_SIZE.y - 1 {
-            return true;
+            paint_positions(&mut board, &block.positions, block.color);
+            ret_val = true;
+            break;
         }
 
         // Check if anything is under the position.
         if is_occupied(board, *position + Delta { x: 0, y: 1 }) {
-            return true;
+            paint_positions(&mut board, &block.positions, block.color);
+            ret_val = true;
+            break;
         }
     }
-    false
+
+    paint_positions(&mut board, &block.positions, block.color);
+    ret_val
 }
 
 fn can_move_here(board: &Board, p: Position) -> bool {
