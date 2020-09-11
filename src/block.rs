@@ -394,11 +394,13 @@ fn rotation_vectors() -> RotationMap {
 pub fn rotate_block(block: &Block, orientation: u8) -> Vec<Position> {
     let mut orientation = orientation;
 
-    let rotv: RotationMap = rotation_vectors();
+    let rotation_map: RotationMap = rotation_vectors();
 
     // special cases
     match block.label {
+        // I, S and Z blocks only have 2 orientations
         Label::I | Label::S | Label::Z => orientation %= 2,
+        // No point rotating the O (square block)
         Label::O => return block.positions.clone(),
         _ => {}
     }
@@ -407,6 +409,6 @@ pub fn rotate_block(block: &Block, orientation: u8) -> Vec<Position> {
         .positions
         .iter()
         .enumerate()
-        .map(|(i, &p)| p + rotv[&block.label][orientation as usize][i])
+        .map(|(i, &p)| p + rotation_map[&block.label][orientation as usize][i])
         .collect()
 }

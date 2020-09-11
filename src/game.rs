@@ -118,8 +118,8 @@ fn handle_move(delta: Delta, mut block: &mut Block, mut board: &mut Board) {
     // collide with other positions in the same block.
     unpaint_positions(&mut board, &block.positions);
 
-    let new_positions: Vec<Position> = block.positions.iter().map(|p| *p + delta).collect();
-    if new_positions.iter().all(|p| can_move_here(&board, *p)) {
+    let new_positions: Vec<Position> = block.positions.iter().map(|&p| p + delta).collect();
+    if new_positions.iter().all(|&p| can_move_here(&board, p)) {
         block.positions = new_positions;
     }
 
@@ -131,13 +131,13 @@ fn has_block_finished_falling(mut board: &mut Board, block: &Block) -> bool {
     // collide with other positions in the same block.
     unpaint_positions(&mut board, &block.positions);
 
-    let is_finished_falling = block.positions.iter().any(|p| {
+    let is_finished_falling = block.positions.iter().any(|&p| {
         // Check at bottom of board.
         if p.y == BOARD_SIZE.y - 1 {
             return true;
         }
         // Check if anything is under the position.
-        if is_occupied(board, *p + Delta { x: 0, y: 1 }) {
+        if is_occupied(board, p + Delta { x: 0, y: 1 }) {
             return true;
         }
         false
@@ -171,7 +171,7 @@ fn handle_rotate(world: &mut World) {
     let new_positions = block::rotate_block(&mut world.block, world.block_orientation);
     if new_positions
         .iter()
-        .all(|p| can_move_here(&world.board, *p))
+        .all(|&p| can_move_here(&world.board, p))
     {
         world.block.positions = new_positions;
         world.block_orientation = (world.block_orientation + 1) % 4;
@@ -184,7 +184,7 @@ fn handle_rotate(world: &mut World) {
 fn delete_full_lines(world: &mut World) -> i32 {
     let mut count = 0;
 
-    let full_rows: Vec<usize> = world
+    let full_row_indexes: Vec<usize> = world
         .board
         .iter()
         .enumerate()
@@ -192,14 +192,14 @@ fn delete_full_lines(world: &mut World) -> i32 {
         .map(|(i, _)| i)
         .collect();
 
-    for index in &full_rows {
+    full_row_indexes.iter().for_each(|&i| {
         // Remove full row
-        world.board.remove(*index);
+        world.board.remove(i);
         // insert new blank row at the top of the board
         world.board.insert(0, vec![None; BOARD_SIZE.x as usize]);
-    }
+    });
 
-    count += full_rows.len();
+    count += full_row_indexes.len();
     count as i32
 }
 
