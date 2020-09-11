@@ -118,26 +118,12 @@ fn handle_move(delta: Delta, mut block: &mut Block, mut board: &mut Board) {
     // collide with other positions in the same block.
     unpaint_positions(&mut board, &block.positions);
 
-    let new_positions = new_positions_from_delta(delta, &block, &board);
-    if !new_positions.is_empty() {
+    let new_positions: Vec<Position> = block.positions.iter().map(|p| *p + delta).collect();
+    if new_positions.iter().all(|p| can_move_here(&board, *p)) {
         block.positions = new_positions;
     }
 
     paint_positions(&mut board, &block.positions, block.color);
-}
-
-// Returns empty vec if block cannot be moved to the delta position.
-fn new_positions_from_delta(delta: Delta, block: &block::Block, board: &Board) -> Vec<Position> {
-    let mut new_positions: Vec<Position> = Vec::new();
-    for position in block.positions.iter() {
-        let new_position = *position + delta;
-        if !can_move_here(&board, new_position) {
-            new_positions.clear();
-            return new_positions;
-        }
-        new_positions.push(new_position);
-    }
-    new_positions
 }
 
 fn has_block_finished_falling(mut board: &mut Board, block: &Block) -> bool {
