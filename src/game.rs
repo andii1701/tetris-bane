@@ -2,31 +2,22 @@
 
 The way the game works.
 
-The "board" is represented by a double subscript array of Vecs.  Each
+The "board" is represented by a double subscript array of Vecs. Each
 position on the board is an Option<Color>. If the Color is None then
-the position is blank otherwise that Color is drawn in the positions.
+the position is blank otherwise that Color is drawn in the sdl_layer.
 
 Each Tetris Block consists of a Vec of positions and a Color. A
-Position has a X and Y component. The block positions are "painted" on
-the board each game loop.
+Position has a X and Y component.
 
-During the each game loop when the Block is moved or rotated by the
-player or the block "falls". The block is removed from the board, then
-the Block's positions are updated and each position is checked to see
-if the move is possible. If the move is possible the new positions are
-assigned to the Block. Otherwise the new positions are
-discarded. After movement logic is completed the Block's positions are
-re-painted on the Board.
-
-The advantage of this approach is that each position in the Block can
-be treated independently with concern for other positions in the
-block. It also make rendering simple as the render only has to render
-the board. The disadvantage is that you have to remember to unpaint
-and re-paint the block before and after each move is attempted.
+During each game loop when the Block is moved or rotated by the player
+or the block "falls", the block's new positions are checked to see if
+the move can be made, if the move is possible the Block is assigned
+the new positions, otherwise the new positions are discarded.
 
 Before the block "falls" one square a check is done to see if the
 Block has finished falling. If the block has finished falling a new
-block is spawned, complete lines are removed.
+block is spawned, complete lines are removed and game end check is
+made.
 
 */
 
