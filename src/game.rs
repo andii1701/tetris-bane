@@ -145,25 +145,20 @@ fn has_block_finished_falling(mut board: &mut Board, block: &Block) -> bool {
     // collide with other positions in the same block.
     unpaint_positions(&mut board, &block.positions);
 
-    let mut ret_val = false;
-    for position in block.positions.iter() {
+    let is_finished_falling = block.positions.iter().any(|p| {
         // Check at bottom of board.
-        if position.y == BOARD_SIZE.y - 1 {
-            paint_positions(&mut board, &block.positions, block.color);
-            ret_val = true;
-            break;
+        if p.y == BOARD_SIZE.y - 1 {
+            return true;
         }
-
         // Check if anything is under the position.
-        if is_occupied(board, *position + Delta { x: 0, y: 1 }) {
-            paint_positions(&mut board, &block.positions, block.color);
-            ret_val = true;
-            break;
+        if is_occupied(board, *p + Delta { x: 0, y: 1 }) {
+            return true;
         }
-    }
+        false
+    });
 
     paint_positions(&mut board, &block.positions, block.color);
-    ret_val
+    is_finished_falling
 }
 
 fn can_move_here(board: &Board, p: Position) -> bool {
