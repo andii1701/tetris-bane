@@ -179,16 +179,17 @@ fn is_occupied(board: &Board, position: Position) -> bool {
 }
 
 fn handle_rotate(world: &mut World) {
+    // NOTE: Need to remove block from board, otherwise positions within the block
+    // collide with other positions in the same block.
     unpaint_positions(&mut world.board, &world.block.positions);
     let new_positions = block::rotate_block(&mut world.block, world.block_orientation);
-    for p in new_positions.iter() {
-        if !can_move_here(&world.board, *p) {
-            paint_positions(&mut world.board, &world.block.positions, world.block.color);
-            return;
-        }
+    if new_positions
+        .iter()
+        .all(|p| can_move_here(&world.board, *p))
+    {
+        world.block.positions = new_positions;
+        world.block_orientation = (world.block_orientation + 1) % 4;
     }
-    world.block.positions = new_positions;
-    world.block_orientation = (world.block_orientation + 1) % 4;
     paint_positions(&mut world.board, &world.block.positions, world.block.color);
 }
 
