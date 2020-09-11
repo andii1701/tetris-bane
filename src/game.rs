@@ -58,15 +58,15 @@ pub fn initialise() -> World {
 }
 
 fn paint_positions(board: &mut Board, positions: &Vec<Position>, color: block::Color) {
-    for p in positions.iter() {
-        board[p.y as usize][p.x as usize] = Some(color);
-    }
+    positions
+        .iter()
+        .for_each(|p| board[p.y as usize][p.x as usize] = Some(color));
 }
 
 fn unpaint_positions(board: &mut Board, positions: &Vec<Position>) {
-    for p in positions.iter() {
-        board[p.y as usize][p.x as usize] = None;
-    }
+    positions
+        .iter()
+        .for_each(|p| board[p.y as usize][p.x as usize] = None);
 }
 
 pub fn update(event: &Option<Input>, world: &mut World) {
@@ -97,8 +97,8 @@ pub fn update(event: &Option<Input>, world: &mut World) {
     if world.block_drop_clock.elapsed().as_millis() > world.fall_rate_millis {
         world.block_drop_clock = Instant::now();
 
-        // NOTE: We want to handle checking if the block has finished falling in
-        // the elapsed time check. Because this gives the user an chance
+        // NOTE: We want to handle if the block has finished falling in
+        // the elapsed time check as gives the user an chance
         // to quickly move the block at the last split second and "wedge" it into
         // gaps.
         if has_block_finished_falling(&mut world.board, &world.block) {
