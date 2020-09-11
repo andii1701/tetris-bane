@@ -35,11 +35,8 @@ pub struct World {
     pub block: block::Block,
     pub block_orientation: u8,
     pub board: Board,
-
     pub fall_rate_millis: u128, // elapsed ms before blocks drop to next row
-
     pub block_drop_clock: Instant,
-
     pub score: i32,
 }
 
@@ -102,9 +99,21 @@ pub fn update(event: &Option<Input>, world: &mut World) {
         // to quickly move the block at the last split second and "wedge" it into
         // gaps.
         if has_block_finished_falling(&mut world.board, &world.block) {
-            world.block = block::spawn();
-            world.block_orientation = 0;
-            world.fall_rate_millis = DEFAULT_FALL_RATE;
+            let spawned_block = block::spawn();
+            if !positions_empty_on_board(&spawned_block.positions, &world.board) {
+                println!("Game Over!");
+                // Paint the new block on the board to show how the player lost. If this
+                // does not happen the game will end with an empty line
+                paint_positions(
+                    &mut world.board,
+                    &spawned_block.positions,
+                    spawned_block.color,
+                );
+            } else {
+                world.block = spawned_block;
+                world.block_orientation = 0;
+                world.fall_rate_millis = DEFAULT_FALL_RATE;
+            }
             world.score += delete_full_lines(world);
             return;
         }
@@ -119,7 +128,7 @@ fn handle_move(delta: Delta, mut block: &mut Block, mut board: &mut Board) {
     unpaint_positions(&mut board, &block.positions);
 
     let new_positions: Vec<Position> = block.positions.iter().map(|&p| p + delta).collect();
-    if new_positions.iter().all(|&p| can_move_here(&board, p)) {
+    if positions_empty_on_board(&new_positions, &board) {
         block.positions = new_positions;
     }
 
@@ -201,6 +210,10 @@ fn delete_full_lines(world: &mut World) -> i32 {
 
     count += full_row_indexes.len();
     count as i32
+}
+
+fn positions_empty_on_board(positions: &Vec<Position>, board: &Board) -> bool {
+    positions.iter().all(|&p| can_move_here(&board, p))
 }
 
 fn is_row_full(row: Vec<Option<block::Color>>) -> bool {
