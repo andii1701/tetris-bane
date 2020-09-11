@@ -52,6 +52,18 @@ pub fn update_and_render(
                 .unwrap();
         }
     }
+    // Draw active block on the board
+    canvas.set_draw_color(game_color_to_sdl_color(world.block.color));
+    world.block.positions.iter().for_each(|&p| {
+        canvas
+            .fill_rect(Rect::new(
+                board_origin.x + (BLOCK_SIZE + GAP) * p.x,
+                board_origin.y + (BLOCK_SIZE + GAP) * p.y,
+                BLOCK_SIZE as u32,
+                BLOCK_SIZE as u32,
+            ))
+            .unwrap();
+    });
 }
 
 fn game_color_to_sdl_color(color: block::Color) -> Color {

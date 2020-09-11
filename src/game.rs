@@ -73,29 +73,14 @@ pub struct World {
 }
 
 pub fn initialise() -> World {
-    let mut board = vec![vec![None; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize];
-    let starting_block = block::spawn();
-    paint_positions(&mut board, &starting_block.positions, starting_block.color);
     World {
-        board: board,
-        block: starting_block,
+        board: vec![vec![None; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize],
+        block: block::spawn(),
         block_orientation: 0,
         fall_rate_millis: DEFAULT_FALL_RATE,
         block_drop_clock: Instant::now(),
         score: 0,
     }
-}
-
-fn paint_positions(board: &mut Board, positions: &Vec<Position>, color: block::Color) {
-    positions
-        .iter()
-        .for_each(|p| board[p.y as usize][p.x as usize] = Some(color));
-}
-
-fn unpaint_positions(board: &mut Board, positions: &Vec<Position>) {
-    positions
-        .iter()
-        .for_each(|p| board[p.y as usize][p.x as usize] = None);
 }
 
 pub fn update(event: &Option<Input>, world: &mut World) {
@@ -115,7 +100,8 @@ pub fn update(event: &Option<Input>, world: &mut World) {
                 handle_move(Delta { y: 0, x: 1 }, &mut world.block, &mut world.board);
             }
             Input::UpKeyDown => {
-                handle_rotate(world);
+                world.block_orientation =
+                    handle_rotate(&world.board, &mut world.block, world.block_orientation);
             }
             Input::DownKeyDown => {
                 world.fall_rate_millis = FAST_FALL_RATE;
@@ -131,6 +117,8 @@ pub fn update(event: &Option<Input>, world: &mut World) {
         // to quickly move the block at the last split second and "wedge" it into
         // gaps.
         if has_block_finished_falling(&mut world.board, &world.block) {
+            paint_positions(&mut world.board, &world.block.positions, world.block.color);
+
             let spawned_block = block::spawn();
             if !positions_empty_on_board(&spawned_block.positions, &world.board) {
                 println!("Game Over!");
@@ -154,25 +142,21 @@ pub fn update(event: &Option<Input>, world: &mut World) {
     }
 }
 
-fn handle_move(delta: Delta, mut block: &mut Block, mut board: &mut Board) {
-    // NOTE: Need to remove block from board, otherwise positions within the block
-    // collide with other positions in the same block.
-    unpaint_positions(&mut board, &block.positions);
+fn paint_positions(board: &mut Board, positions: &Vec<Position>, color: block::Color) {
+    positions
+        .iter()
+        .for_each(|p| board[p.y as usize][p.x as usize] = Some(color));
+}
 
+fn handle_move(delta: Delta, block: &mut Block, board: &Board) {
     let new_positions: Vec<Position> = block.positions.iter().map(|&p| p + delta).collect();
     if positions_empty_on_board(&new_positions, &board) {
         block.positions = new_positions;
     }
-
-    paint_positions(&mut board, &block.positions, block.color);
 }
 
-fn has_block_finished_falling(mut board: &mut Board, block: &Block) -> bool {
-    // NOTE: Need to remove block from board, otherwise positions within the block
-    // collide with other positions in the same block.
-    unpaint_positions(&mut board, &block.positions);
-
-    let is_finished_falling = block.positions.iter().any(|&p| {
+fn has_block_finished_falling(board: &Board, block: &Block) -> bool {
+    block.positions.iter().any(|&p| {
         // Check at bottom of board.
         if p.y == BOARD_SIZE.y - 1 {
             return true;
@@ -182,10 +166,7 @@ fn has_block_finished_falling(mut board: &mut Board, block: &Block) -> bool {
             return true;
         }
         false
-    });
-
-    paint_positions(&mut board, &block.positions, block.color);
-    is_finished_falling
+    })
 }
 
 fn can_move_here(board: &Board, p: Position) -> bool {
@@ -205,19 +186,14 @@ fn is_occupied(board: &Board, position: Position) -> bool {
     }
 }
 
-fn handle_rotate(world: &mut World) {
-    // NOTE: Need to remove block from board, otherwise positions within the block
-    // collide with other positions in the same block.
-    unpaint_positions(&mut world.board, &world.block.positions);
-    let new_positions = block::rotate_block(&mut world.block, world.block_orientation);
-    if new_positions
-        .iter()
-        .all(|&p| can_move_here(&world.board, p))
-    {
-        world.block.positions = new_positions;
-        world.block_orientation = (world.block_orientation + 1) % 4;
+fn handle_rotate(board: &Board, mut block: &mut Block, orientation: u8) -> u8 {
+    let mut orientation = orientation;
+    let new_positions = block::rotate_block(&mut block, orientation);
+    if new_positions.iter().all(|&p| can_move_here(&board, p)) {
+        block.positions = new_positions;
+        orientation = (orientation + 1) % 4;
     }
-    paint_positions(&mut world.board, &world.block.positions, world.block.color);
+    orientation
 }
 
 // Deletes full lines on board and returns te number of lines
