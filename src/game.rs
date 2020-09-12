@@ -86,15 +86,15 @@ pub fn update(event: &Option<Input>, world: &mut World) {
             }
             Input::LeftKeyDown => {
                 world.block.positions =
-                    handle_move(Delta { y: 0, x: -1 }, &world.block, &world.board);
+                    move_block(&world.block, &world.board, Delta { y: 0, x: -1 });
             }
             Input::RightKeyDown => {
                 world.block.positions =
-                    handle_move(Delta { y: 0, x: 1 }, &world.block, &world.board);
+                    move_block(&world.block, &world.board, Delta { y: 0, x: 1 });
             }
             Input::UpKeyDown => {
                 let (positions, orientation) =
-                    handle_rotate(&world.board, &world.block, world.block_orientation);
+                    rotate_block(&world.block, &world.board, world.block_orientation);
                 world.block.positions = positions;
                 world.block_orientation = orientation;
             }
@@ -107,8 +107,8 @@ pub fn update(event: &Option<Input>, world: &mut World) {
     if world.block_drop_clock.elapsed().as_millis() > world.fall_rate_millis {
         world.block_drop_clock = Instant::now();
 
-        // NOTE: We want to handle if the block has finished falling in
-        // the elapsed time check as it gives the player a chance
+        // NOTE: We want to handle the case when the block has finished falling in
+        // the elapsed time. As this gives the player a chance
         // to quickly move the block at the last split second and "wedge" it into
         // gaps.
         if has_block_finished_falling(&world.board, &world.block) {
@@ -132,7 +132,7 @@ pub fn update(event: &Option<Input>, world: &mut World) {
             return;
         }
         // Move block one square down.
-        world.block.positions = handle_move(Delta { y: 1, x: 0 }, &world.block, &world.board);
+        world.block.positions = move_block(&world.block, &world.board, Delta { y: 1, x: 0 });
     }
 }
 
@@ -144,7 +144,7 @@ fn paint_positions(board: &Board, positions: &Vec<Position>, color: block::Color
     board
 }
 
-fn handle_move(delta: Delta, block: &Block, board: &Board) -> Vec<Position> {
+fn move_block(block: &Block, board: &Board, delta: Delta) -> Vec<Position> {
     let new_positions: Vec<Position> = block.positions.iter().map(|&p| p + delta).collect();
     if positions_empty_on_board(&new_positions, &board) {
         return new_positions;
@@ -183,7 +183,7 @@ fn is_occupied(board: &Board, position: Position) -> bool {
     }
 }
 
-fn handle_rotate(board: &Board, block: &Block, orientation: u8) -> (Vec<Position>, u8) {
+fn rotate_block(block: &Block, board: &Board, orientation: u8) -> (Vec<Position>, u8) {
     let new_positions = block::rotate_block(&block, orientation);
     if new_positions.iter().all(|&p| can_move_here(&board, p)) {
         return (new_positions, (orientation + 1) % 4);
