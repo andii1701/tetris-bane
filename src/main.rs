@@ -1,4 +1,5 @@
 // TODO menu, with res options, vol control, full screen.
+// TODO See if Rubik font is ok for fps overlay
 
 use std::path::Path;
 use std::time::Instant;
@@ -14,11 +15,13 @@ mod block;
 mod game;
 mod game_sdl_layer;
 
-static FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
+static SYSTEM_FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
+static GAME_FONT_PATH: &str = "assets/fonts/muli/Muli.ttf";
 static SOUND_PATH: &str = "assets/sounds/chrip_44.wav";
 static MUSIC_PATH: &str = "assets/music/music.ogg";
 
 static OVERLAY_FONT_SIZE: u16 = 12;
+static SCORE_FONT_SIZE: u16 = 22;
 
 fn fps_color(fps: u32) -> Color {
     match fps {
@@ -45,8 +48,14 @@ pub fn main() {
     music.play(1).unwrap();
     Music::pause();
 
-    let font_path: &Path = Path::new(FONT_PATH);
-    let font = ttf_context.load_font(font_path, OVERLAY_FONT_SIZE).unwrap();
+    let system_font_path: &Path = Path::new(SYSTEM_FONT_PATH);
+    let font = ttf_context
+        .load_font(system_font_path, OVERLAY_FONT_SIZE)
+        .unwrap();
+    let game_font_path: &Path = Path::new(GAME_FONT_PATH);
+    let score_font = ttf_context
+        .load_font(game_font_path, SCORE_FONT_SIZE)
+        .unwrap();
 
     let video_subsystem = sdl_context.video().unwrap();
     let timer_subsystem = sdl_context.timer().unwrap();
@@ -141,7 +150,7 @@ pub fn main() {
             }
         }
 
-        game_sdl_layer::update_and_render(&mut canvas, &font, &input_event, &mut world);
+        game_sdl_layer::update_and_render(&mut canvas, &score_font, &input_event, &mut world);
 
         input_event = None;
 

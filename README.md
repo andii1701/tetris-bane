@@ -10,6 +10,10 @@ A simple Tetris clone written in Rust using SDL2
 
  * Another Rust tetris https://github.com/camccar/RustTetris
 
- * Nice game boy tetris https://maxwell-umeshinon.itch.io/tetris
+ * Nice game boy tetris clone https://maxwell-umeshinon.itch.io/tetris
 
  * Nintendo rotation system https://tetris.fandom.com/wiki/Nintendo_Rotation_System
+
+ * https://depth-first.com/articles/2020/06/29/compiling-rust-to-webassembly-a-simple-example/
+
+ * https://github.com/gliheng/rust-wasm/blob/master/sdl2-drag/Makefile
