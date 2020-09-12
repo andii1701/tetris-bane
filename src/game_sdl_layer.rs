@@ -36,8 +36,8 @@ pub struct GameFonts<'ttf> {
 pub fn initialise_fonts(ttf_context: &Sdl2TtfContext) -> GameFonts {
     let game_font_path: &Path = Path::new(GAME_FONT_PATH);
     let score_font = ttf_context.load_font(game_font_path, 22).unwrap();
-    let title_font = ttf_context.load_font(game_font_path, 30).unwrap();
-    let menu_font = ttf_context.load_font(game_font_path, 25).unwrap();
+    let title_font = ttf_context.load_font(game_font_path, 50).unwrap();
+    let menu_font = ttf_context.load_font(game_font_path, 35).unwrap();
     GameFonts {
         score: score_font,
         title: title_font,
@@ -51,7 +51,7 @@ pub fn update_and_render(
     event: &Option<game::Input>,
     mut world: &mut game::World,
 ) {
-    let menu_mode = false;
+    let menu_mode = true;
     if menu_mode {
         // menu::update
         render_menu(&mut canvas, &fonts, &mut world);
@@ -138,6 +138,8 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, _world: &mut game::
 
     // Draw title
 
+    let title_offset_from_center = 90;
+
     let font_surface = fonts
         .title
         .render(&"Tetris Bane")
@@ -147,23 +149,29 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, _world: &mut game::
     let mut title_rect = font_surface.rect();
     let title_origin = Point::new(
         ((canvas_width as f32 / 2.) - (title_rect.width() as f32 / 2.)) as i32,
-        ((canvas_height as f32 / 2.) - (title_rect.height() as f32 / 2.)) as i32,
+        ((canvas_height as f32 / 2.) - (title_rect.height() as f32 / 2.)) as i32
+            - title_offset_from_center,
     );
     title_rect.reposition(title_origin);
     canvas.copy(&texture, None, title_rect).unwrap();
 
-    //Draw menu
+    // Draw menu
 
-    let font_surface = fonts.menu.render(&"Play").blended(TEXT_COLOR).unwrap();
-    let texture = font_surface.as_texture(&texture_creator).unwrap();
-    let mut menu_rect = font_surface.rect();
-    let menu_origin = Point::new(
-        ((canvas_width as f32 / 2.) - (menu_rect.width() as f32 / 2.)) as i32,
-        title_rect.y + title_rect.height() as i32 + 10,
-    );
+    let menu_items = vec!["Play", "Mode: Classic", "Quit"];
+    let mut text_offset = 20;
+    menu_items.iter().for_each(|&item| {
+        let font_surface = fonts.menu.render(item).blended(TEXT_COLOR).unwrap();
+        let texture = font_surface.as_texture(&texture_creator).unwrap();
+        let mut menu_rect = font_surface.rect();
+        let menu_origin = Point::new(
+            ((canvas_width as f32 / 2.) - (menu_rect.width() as f32 / 2.)) as i32,
+            title_rect.y + title_rect.height() as i32 + text_offset,
+        );
 
-    menu_rect.reposition(menu_origin);
-    canvas.copy(&texture, None, menu_rect).unwrap();
+        menu_rect.reposition(menu_origin);
+        canvas.copy(&texture, None, menu_rect).unwrap();
+        text_offset += 50;
+    });
 }
 
 fn game_color_to_sdl_color(color: block::Color) -> Color {
