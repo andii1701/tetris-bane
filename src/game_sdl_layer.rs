@@ -36,8 +36,8 @@ pub fn update_and_render(
         x: canvas_mid.x - (board_width as f32 / 2.) as i32,
         y: canvas_mid.y - (board_height as f32 / 2.) as i32,
     };
-    for y in 0..game::BOARD_SIZE.y {
-        for x in 0..game::BOARD_SIZE.x {
+    (0..game::BOARD_SIZE.y).for_each(|y| {
+        (0..game::BOARD_SIZE.x).for_each(|x| {
             match world.board[y as usize][x as usize] {
                 Some(color) => canvas.set_draw_color(game_color_to_sdl_color(color)),
                 None => canvas.set_draw_color(Color::RGB(50, 50, 50)),
@@ -50,8 +50,8 @@ pub fn update_and_render(
                     BLOCK_SIZE as u32,
                 ))
                 .unwrap();
-        }
-    }
+        })
+    });
     // Draw active block on the board
     canvas.set_draw_color(game_color_to_sdl_color(world.block.color));
     world.block.positions.iter().for_each(|&p| {
