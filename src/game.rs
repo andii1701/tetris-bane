@@ -14,11 +14,13 @@ or the block "falls", the block's new positions are checked to see if
 the move can be made, if the move is possible the Block is assigned
 the new positions, otherwise the new positions are discarded.
 
-Before the block "falls" one square a check is done to see if the
-Block has finished falling. If the block has finished falling a new
-block is spawned, complete lines are removed and game end check is
-made.
+Before the block "falls" a check is done to see if the Block has
+finished falling. If the block has finished falling a new block is
+spawned, complete lines are removed.
 
+If a block cannot be spawned because the board is full. The block is
+still painted on the board to indicate to the player how the game was
+lost. Then the game ends.
 */
 
 use std::ops::Add;
@@ -75,7 +77,6 @@ pub fn initialise() -> World {
 }
 
 pub fn update(event: &Option<Input>, world: &mut World) {
-    // NOTE: Don't accept user input if a new block is spawned.
     if let Some(event) = event {
         match event {
             // NOTE: DownKeyUp needs to be first in the match call otherwise
@@ -118,7 +119,7 @@ pub fn update(event: &Option<Input>, world: &mut World) {
             if !positions_empty_on_board(&spawned_block.positions, &world.board) {
                 println!("Game Over!");
                 // Paint the new block on the board to show how the player lost. If this
-                // does not happen the game will end with an empty line
+                // does not happen the game could end with an empty line at the top of the board.
                 world.board =
                     paint_positions(&world.board, &spawned_block.positions, spawned_block.color);
             } else {
