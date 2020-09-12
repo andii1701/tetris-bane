@@ -112,24 +112,23 @@ pub fn update(event: &Option<Input>, world: &mut World) {
         // to quickly move the block at the last split second and "wedge" it into
         // gaps.
         if has_block_finished_falling(&world.board, &world.block) {
-            paint_positions(&mut world.board, &world.block.positions, world.block.color);
+            world.board = paint_positions(&world.board, &world.block.positions, world.block.color);
 
             let spawned_block = block::spawn();
             if !positions_empty_on_board(&spawned_block.positions, &world.board) {
                 println!("Game Over!");
                 // Paint the new block on the board to show how the player lost. If this
                 // does not happen the game will end with an empty line
-                paint_positions(
-                    &mut world.board,
-                    &spawned_block.positions,
-                    spawned_block.color,
-                );
+                world.board =
+                    paint_positions(&world.board, &spawned_block.positions, spawned_block.color);
             } else {
                 world.block = spawned_block;
                 world.block_orientation = 0;
                 world.fall_rate_millis = DEFAULT_FALL_RATE;
             }
-            world.score += delete_full_lines(&mut world.board);
+            let (board, score) = delete_full_lines(&world.board);
+            world.board = board;
+            world.score += score;
             return;
         }
         // Move block one square down.
@@ -137,10 +136,12 @@ pub fn update(event: &Option<Input>, world: &mut World) {
     }
 }
 
-fn paint_positions(board: &mut Board, positions: &Vec<Position>, color: block::Color) {
+fn paint_positions(board: &Board, positions: &Vec<Position>, color: block::Color) -> Board {
+    let mut board = board.clone();
     positions
         .iter()
         .for_each(|p| board[p.y as usize][p.x as usize] = Some(color));
+    board
 }
 
 fn handle_move(delta: Delta, block: &Block, board: &Board) -> Vec<Position> {
@@ -192,7 +193,8 @@ fn handle_rotate(board: &Board, block: &Block, orientation: u8) -> (Vec<Position
 
 // Deletes full lines on board and returns te number of lines
 // deleted.
-fn delete_full_lines(board: &mut Board) -> i32 {
+fn delete_full_lines(board: &Board) -> (Board, i32) {
+    let mut board = board.clone();
     let mut count = 0;
 
     let full_row_indexes: Vec<usize> = board
@@ -210,7 +212,7 @@ fn delete_full_lines(board: &mut Board) -> i32 {
     });
 
     count += full_row_indexes.len();
-    count as i32
+    (board, count as i32)
 }
 
 fn positions_empty_on_board(positions: &Vec<Position>, board: &Board) -> bool {
