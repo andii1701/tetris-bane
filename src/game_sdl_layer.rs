@@ -7,15 +7,19 @@ use crate::game;
 
 use crate::block;
 
-// offset from bottom of canvas
-const SCORE_OFFSET_X: u32 = 70;
-
 const BLOCK_SIZE: i32 = 25;
 const GAP: i32 = 1;
 const TEXT_COLOR: Color = Color {
-    r: 200,
-    g: 200,
-    b: 200,
+    r: 70,
+    g: 70,
+    b: 70,
+    a: 255,
+};
+
+const BOARD_COLOR: Color = Color {
+    r: 50,
+    g: 50,
+    b: 50,
     a: 255,
 };
 
@@ -48,7 +52,7 @@ pub fn update_and_render(
         (0..game::BOARD_SIZE.x).for_each(|x| {
             match world.board[y as usize][x as usize] {
                 Some(color) => canvas.set_draw_color(game_color_to_sdl_color(color)),
-                None => canvas.set_draw_color(Color::RGB(50, 50, 50)),
+                None => canvas.set_draw_color(BOARD_COLOR),
             }
             canvas
                 .fill_rect(Rect::new(
@@ -81,12 +85,12 @@ pub fn update_and_render(
         .unwrap();
     let texture = font_surface.as_texture(&texture_creator).unwrap();
     let mut score_rect = font_surface.rect();
-    let score_board_position = Point::new(
-        canvas_mid.x - (score_rect.width() as f32 / 2.) as i32,
-        (canvas_height - SCORE_OFFSET_X) as i32,
+    let score_board_origin = Point::new(
+        board_origin.x + board_width - score_rect.width() as i32 - 1,
+        board_origin.y + board_height,
     );
 
-    score_rect.reposition(score_board_position);
+    score_rect.reposition(score_board_origin);
     canvas.copy(&texture, None, score_rect).unwrap();
 }
 
