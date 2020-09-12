@@ -6,6 +6,7 @@ use sdl2::render::WindowCanvas;
 use sdl2::ttf::{Font, Sdl2TtfContext};
 
 use crate::game;
+use crate::menu;
 
 use crate::block;
 
@@ -13,7 +14,8 @@ const GAME_FONT_PATH: &str = "assets/fonts/muli/Muli.ttf";
 
 const BLOCK_SIZE: i32 = 25;
 const GAP: i32 = 1;
-const TEXT_COLOR: Color = Color {
+
+const DEFAULT_TEXT_COLOR: Color = Color {
     r: 70,
     g: 70,
     b: 70,
@@ -49,20 +51,20 @@ pub fn update_and_render(
     mut canvas: &mut WindowCanvas,
     fonts: &GameFonts,
     event: &Option<game::Input>,
-    mut world: &mut game::World,
+    world: &mut game::World,
 ) {
     let menu_mode = true;
     if menu_mode {
         // menu::update
-        render_menu(&mut canvas, &fonts, &mut world);
+        render_menu(&mut canvas, &fonts, &world.menu);
     } else {
         game::update(event, world);
-        render_game(&mut canvas, &fonts, &mut world);
+        render_game(&mut canvas, &fonts, &world);
     };
     // update
 }
 
-fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, world: &mut game::World) {
+fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, world: &game::World) {
     // render
     canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
@@ -114,7 +116,7 @@ fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, world: &mut game::W
     let font_surface = fonts
         .score
         .render(&format!("{}", world.score))
-        .blended(TEXT_COLOR)
+        .blended(DEFAULT_TEXT_COLOR)
         .unwrap();
     let texture = font_surface.as_texture(&texture_creator).unwrap();
     let mut score_rect = font_surface.rect();
@@ -127,7 +129,14 @@ fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, world: &mut game::W
     canvas.copy(&texture, None, score_rect).unwrap();
 }
 
-fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, _world: &mut game::World) {
+fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) {
+    let selected_text_color: Color = Color {
+        r: 200,
+        g: 200,
+        b: 200,
+        a: 255,
+    };
+
     // render
     canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
@@ -137,13 +146,12 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, _world: &mut game::
     let texture_creator = canvas.texture_creator();
 
     // Draw title
-
     let title_offset_from_center = 90;
 
     let font_surface = fonts
         .title
         .render(&"Tetris Bane")
-        .blended(TEXT_COLOR)
+        .blended(DEFAULT_TEXT_COLOR)
         .unwrap();
     let texture = font_surface.as_texture(&texture_creator).unwrap();
     let mut title_rect = font_surface.rect();
@@ -156,11 +164,14 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, _world: &mut game::
     canvas.copy(&texture, None, title_rect).unwrap();
 
     // Draw menu
-
-    let menu_items = vec!["Play", "Mode: Classic", "Quit"];
     let mut text_offset = 20;
-    menu_items.iter().for_each(|&item| {
-        let font_surface = fonts.menu.render(item).blended(TEXT_COLOR).unwrap();
+    menu.items.iter().enumerate().for_each(|(index, &item)| {
+        let color = if index == menu.selected as usize {
+            selected_text_color
+        } else {
+            DEFAULT_TEXT_COLOR
+        };
+        let font_surface = fonts.menu.render(item).blended(color).unwrap();
         let texture = font_surface.as_texture(&texture_creator).unwrap();
         let mut menu_rect = font_surface.rect();
         let menu_origin = Point::new(

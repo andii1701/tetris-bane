@@ -29,6 +29,8 @@ use std::time::Instant;
 use crate::block;
 use crate::block::{Block, Delta, Position};
 
+use crate::menu;
+
 type Dimension = Position;
 
 pub const BOARD_SIZE: Dimension = Dimension { x: 10, y: 20 };
@@ -56,16 +58,17 @@ impl Add for Position {
     }
 }
 
-pub struct World {
+pub struct World<'a> {
     pub block: block::Block,
     pub block_orientation: u8,
     pub board: Board,
     pub fall_rate_millis: u128, // elapsed ms before blocks drop to next row
     pub block_drop_clock: Instant,
     pub score: i32,
+    pub menu: menu::Menu<'a>,
 }
 
-pub fn initialise() -> World {
+pub fn initialise() -> World<'static> {
     World {
         board: vec![vec![None; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize],
         block: block::spawn(),
@@ -73,6 +76,7 @@ pub fn initialise() -> World {
         fall_rate_millis: DEFAULT_FALL_RATE,
         block_drop_clock: Instant::now(),
         score: 0,
+        menu: menu::initialise(),
     }
 }
 

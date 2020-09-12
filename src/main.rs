@@ -14,6 +14,7 @@ use sdl2::pixels::Color;
 mod block;
 mod game;
 mod game_sdl_layer;
+mod menu;
 
 const SYSTEM_FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
 const SOUND_PATH: &str = "assets/sounds/chrip_44.wav";
