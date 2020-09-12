@@ -1,6 +1,4 @@
 // TODO menu, with res options, vol control, full screen.
-// TODO debug output.
-// TODO Fix fast block getting stuck bug.
 
 use std::path::Path;
 use std::time::Instant;
@@ -143,7 +141,7 @@ pub fn main() {
             }
         }
 
-        game_sdl_layer::update_and_render(&mut canvas, &input_event, &mut world);
+        game_sdl_layer::update_and_render(&mut canvas, &font, &input_event, &mut world);
 
         input_event = None;
 

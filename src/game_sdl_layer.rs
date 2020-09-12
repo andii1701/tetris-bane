@@ -1,19 +1,24 @@
-// SDL layer for the game. Responsible for passing a rendered surface and sounds to be played
-// back to main loop.
-
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
-
-pub const BLOCK_SIZE: i32 = 25;
-pub const GAP: i32 = 1;
+use sdl2::ttf::Font;
 
 use crate::game;
 
 use crate::block;
 
+const BLOCK_SIZE: i32 = 25;
+const GAP: i32 = 1;
+const TEXT_COLOR: Color = Color {
+    r: 255,
+    g: 255,
+    b: 255,
+    a: 255,
+};
+
 pub fn update_and_render(
     canvas: &mut WindowCanvas,
+    font: &Font,
     event: &Option<game::Input>,
     world: &mut game::World,
 ) {
@@ -64,6 +69,17 @@ pub fn update_and_render(
             ))
             .unwrap();
     });
+
+    // Draw score
+    let texture_creator = canvas.texture_creator();
+    let font_surface = font
+        .render(&format!("Score: {}", world.score))
+        .blended(TEXT_COLOR)
+        .unwrap();
+    let texture = font_surface.as_texture(&texture_creator).unwrap();
+    let mut score_rect = font_surface.rect();
+    score_rect.reposition((100, 100));
+    canvas.copy(&texture, None, score_rect).unwrap();
 }
 
 fn game_color_to_sdl_color(color: block::Color) -> Color {
