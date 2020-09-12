@@ -1,5 +1,5 @@
 // TODO menu, with res options, vol control, full screen.
-// TODO See if Rubik font is ok for fps overlay
+// TODO See if game font is ok for fps overlay
 
 use std::path::Path;
 use std::time::Instant;
@@ -15,13 +15,11 @@ mod block;
 mod game;
 mod game_sdl_layer;
 
-static SYSTEM_FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
-static GAME_FONT_PATH: &str = "assets/fonts/muli/Muli.ttf";
-static SOUND_PATH: &str = "assets/sounds/chrip_44.wav";
-static MUSIC_PATH: &str = "assets/music/music.ogg";
+const SYSTEM_FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
+const SOUND_PATH: &str = "assets/sounds/chrip_44.wav";
+const MUSIC_PATH: &str = "assets/music/music.ogg";
 
-static OVERLAY_FONT_SIZE: u16 = 12;
-static SCORE_FONT_SIZE: u16 = 22;
+const OVERLAY_FONT_SIZE: u16 = 12;
 
 fn fps_color(fps: u32) -> Color {
     match fps {
@@ -49,13 +47,11 @@ pub fn main() {
     Music::pause();
 
     let system_font_path: &Path = Path::new(SYSTEM_FONT_PATH);
-    let font = ttf_context
+    let overlay_font = ttf_context
         .load_font(system_font_path, OVERLAY_FONT_SIZE)
         .unwrap();
-    let game_font_path: &Path = Path::new(GAME_FONT_PATH);
-    let score_font = ttf_context
-        .load_font(game_font_path, SCORE_FONT_SIZE)
-        .unwrap();
+
+    let game_fonts = game_sdl_layer::initialise_fonts(&ttf_context);
 
     let video_subsystem = sdl_context.video().unwrap();
     let timer_subsystem = sdl_context.timer().unwrap();
@@ -150,12 +146,15 @@ pub fn main() {
             }
         }
 
-        game_sdl_layer::update_and_render(&mut canvas, &score_font, &input_event, &mut world);
+        game_sdl_layer::update_and_render(&mut canvas, &game_fonts, &input_event, &mut world);
 
         input_event = None;
 
         if show_fps {
-            let font_surface = font.render(&fps_string).blended(fps_color(fps)).unwrap();
+            let font_surface = overlay_font
+                .render(&fps_string)
+                .blended(fps_color(fps))
+                .unwrap();
             let texture = font_surface.as_texture(&texture_creator).unwrap();
             canvas.copy(&texture, None, font_surface.rect()).unwrap();
         }
