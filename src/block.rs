@@ -393,7 +393,6 @@ fn rotation_vectors() -> RotationMap {
 // Returns a new set of positions for the rotated block
 pub fn rotate_block(block: &Block, orientation: u8) -> Vec<Position> {
     let mut orientation = orientation;
-
     let rotation_map: RotationMap = rotation_vectors();
 
     // special cases

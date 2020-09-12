@@ -85,14 +85,18 @@ pub fn update(event: &Option<Input>, world: &mut World) {
                 world.fall_rate_millis = DEFAULT_FALL_RATE;
             }
             Input::LeftKeyDown => {
-                handle_move(Delta { y: 0, x: -1 }, &mut world.block, &mut world.board);
+                world.block.positions =
+                    handle_move(Delta { y: 0, x: -1 }, &world.block, &world.board);
             }
             Input::RightKeyDown => {
-                handle_move(Delta { y: 0, x: 1 }, &mut world.block, &mut world.board);
+                world.block.positions =
+                    handle_move(Delta { y: 0, x: 1 }, &world.block, &world.board);
             }
             Input::UpKeyDown => {
-                world.block_orientation =
-                    handle_rotate(&world.board, &mut world.block, world.block_orientation);
+                let (positions, orientation) =
+                    handle_rotate(&world.board, &world.block, world.block_orientation);
+                world.block.positions = positions;
+                world.block_orientation = orientation;
             }
             Input::DownKeyDown => {
                 world.fall_rate_millis = FAST_FALL_RATE;
@@ -107,7 +111,7 @@ pub fn update(event: &Option<Input>, world: &mut World) {
         // the elapsed time check as it gives the player a chance
         // to quickly move the block at the last split second and "wedge" it into
         // gaps.
-        if has_block_finished_falling(&mut world.board, &world.block) {
+        if has_block_finished_falling(&world.board, &world.block) {
             paint_positions(&mut world.board, &world.block.positions, world.block.color);
 
             let spawned_block = block::spawn();
@@ -125,11 +129,11 @@ pub fn update(event: &Option<Input>, world: &mut World) {
                 world.block_orientation = 0;
                 world.fall_rate_millis = DEFAULT_FALL_RATE;
             }
-            world.score += delete_full_lines(world);
+            world.score += delete_full_lines(&mut world.board);
             return;
         }
         // Move block one square down.
-        handle_move(Delta { y: 1, x: 0 }, &mut world.block, &mut world.board);
+        world.block.positions = handle_move(Delta { y: 1, x: 0 }, &world.block, &world.board);
     }
 }
 
@@ -139,11 +143,12 @@ fn paint_positions(board: &mut Board, positions: &Vec<Position>, color: block::C
         .for_each(|p| board[p.y as usize][p.x as usize] = Some(color));
 }
 
-fn handle_move(delta: Delta, block: &mut Block, board: &Board) {
+fn handle_move(delta: Delta, block: &Block, board: &Board) -> Vec<Position> {
     let new_positions: Vec<Position> = block.positions.iter().map(|&p| p + delta).collect();
     if positions_empty_on_board(&new_positions, &board) {
-        block.positions = new_positions;
+        return new_positions;
     }
+    block.positions.clone()
 }
 
 fn has_block_finished_falling(board: &Board, block: &Block) -> bool {
@@ -177,23 +182,20 @@ fn is_occupied(board: &Board, position: Position) -> bool {
     }
 }
 
-fn handle_rotate(board: &Board, mut block: &mut Block, orientation: u8) -> u8 {
-    let mut orientation = orientation;
-    let new_positions = block::rotate_block(&mut block, orientation);
+fn handle_rotate(board: &Board, block: &Block, orientation: u8) -> (Vec<Position>, u8) {
+    let new_positions = block::rotate_block(&block, orientation);
     if new_positions.iter().all(|&p| can_move_here(&board, p)) {
-        block.positions = new_positions;
-        orientation = (orientation + 1) % 4;
+        return (new_positions, (orientation + 1) % 4);
     }
-    orientation
+    (block.positions.clone(), orientation)
 }
 
 // Deletes full lines on board and returns te number of lines
 // deleted.
-fn delete_full_lines(world: &mut World) -> i32 {
+fn delete_full_lines(board: &mut Board) -> i32 {
     let mut count = 0;
 
-    let full_row_indexes: Vec<usize> = world
-        .board
+    let full_row_indexes: Vec<usize> = board
         .iter()
         .enumerate()
         .filter(|(_, r)| is_row_full(r.to_vec()))
@@ -202,9 +204,9 @@ fn delete_full_lines(world: &mut World) -> i32 {
 
     full_row_indexes.iter().for_each(|&i| {
         // Remove full row
-        world.board.remove(i);
+        board.remove(i);
         // insert new blank row at the top of the board
-        world.board.insert(0, vec![None; BOARD_SIZE.x as usize]);
+        board.insert(0, vec![None; BOARD_SIZE.x as usize]);
     });
 
     count += full_row_indexes.len();
