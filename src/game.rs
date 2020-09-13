@@ -58,17 +58,17 @@ impl Add for Position {
     }
 }
 
-pub struct World<'a> {
+pub struct World {
     pub block: block::Block,
     pub block_orientation: u8,
     pub board: Board,
     pub fall_rate_millis: u128, // elapsed ms before blocks drop to next row
     pub block_drop_clock: Instant,
     pub score: i32,
-    pub menu: menu::Menu<'a>,
+    pub menu: menu::Menu,
 }
 
-pub fn initialise() -> World<'static> {
+pub fn initialise() -> World {
     World {
         board: vec![vec![None; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize],
         block: block::spawn(),

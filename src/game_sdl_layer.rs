@@ -55,13 +55,12 @@ pub fn update_and_render(
 ) {
     let menu_mode = true;
     if menu_mode {
-        // menu::update
-        render_menu(&mut canvas, &fonts, &world.menu);
+        menu::update(event, &mut world.menu);
+        render_menu(&mut canvas, fonts, &world.menu);
     } else {
         game::update(event, world);
-        render_game(&mut canvas, &fonts, &world);
+        render_game(&mut canvas, fonts, &world);
     };
-    // update
 }
 
 fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, world: &game::World) {
@@ -165,13 +164,21 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) 
 
     // Draw menu
     let mut text_offset = 20;
-    menu.items.iter().enumerate().for_each(|(index, &item)| {
+    menu.items.iter().enumerate().for_each(|(index, item)| {
         let color = if index == menu.selected as usize {
             selected_text_color
         } else {
             DEFAULT_TEXT_COLOR
         };
-        let font_surface = fonts.menu.render(item).blended(color).unwrap();
+
+        // TODO: Figureout a better way to do this.
+        let label = match item {
+            menu::Item::Play { label }
+            | menu::Item::Quit { label }
+            | menu::Item::Mode { label } => label,
+        };
+
+        let font_surface = fonts.menu.render(&label).blended(color).unwrap();
         let texture = font_surface.as_texture(&texture_creator).unwrap();
         let mut menu_rect = font_surface.rect();
         let menu_origin = Point::new(
