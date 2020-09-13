@@ -1,5 +1,12 @@
-// TODO menu, with res options, vol control, full screen.
-// TODO See if game font is ok for fps overlay
+// TODO
+// menu, with res options, vol control, full screen.
+// See if game font is ok for fps overlay
+// Chill mode
+// Bane mode
+// Pause
+// fade
+// wsam
+// sound
 
 use std::path::Path;
 use std::time::Instant;

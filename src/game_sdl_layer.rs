@@ -182,7 +182,7 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) 
     // Draw menu
     let mut text_offset = 20;
     menu.items.iter().enumerate().for_each(|(index, item)| {
-        let color = if index == menu.selected as usize {
+        let color = if index == menu.item_selected as usize {
             selected_text_color
         } else {
             DEFAULT_TEXT_COLOR

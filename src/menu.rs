@@ -8,23 +8,35 @@ pub enum Item {
 
 pub struct Menu {
     pub items: Vec<Item>,
-    pub selected: usize,
+    pub modes: Vec<game::Mode>,
+    pub item_selected: usize,
+    pub mode_selected: usize,
 }
 
 pub fn initialise() -> Menu {
+    let modes = vec![
+        game::Mode::Classic {
+            label: "Classic".to_string(),
+        },
+        game::Mode::Chill {
+            label: "Chill".to_string(),
+        },
+    ];
+    let mode_selected = 0;
+
     Menu {
         items: vec![
             Item::Play {
                 label: "Play".to_string(),
             },
-            Item::Mode {
-                label: "Mode:".to_string(),
-            },
+            build_mode_item(&modes, mode_selected),
             Item::Quit {
                 label: "Quit".to_string(),
             },
         ],
-        selected: 0,
+        item_selected: 0,
+        modes: modes,
+        mode_selected: mode_selected,
     }
 }
 
@@ -33,23 +45,24 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
 
     if let Some(event) = event {
         match event {
-            // NOTE: DownKeyUp needs to be first in the match call otherwise
-            // the DownKeyUp event will be missed if the user is holding down
-            // another key.
             game::Input::LeftKeyDown => {}
-            game::Input::RightKeyDown => {}
+            game::Input::RightKeyDown => {
+                menu.mode_selected += 1;
+                menu.mode_selected %= menu.modes.len() as usize;
+                menu.items[1] = build_mode_item(&menu.modes, menu.mode_selected);
+            }
             game::Input::UpKeyDown => {
-                menu.selected = if menu.selected as i32 - 1 < 0 {
+                menu.item_selected = if menu.item_selected as i32 - 1 < 0 {
                     (menu.items.len() - 1) as usize
                 } else {
-                    (menu.selected - 1) as usize
+                    (menu.item_selected - 1) as usize
                 };
             }
             game::Input::DownKeyDown => {
-                menu.selected += 1;
-                menu.selected %= menu.items.len() as usize;
+                menu.item_selected += 1;
+                menu.item_selected %= menu.items.len() as usize;
             }
-            game::Input::ReturnDown => match menu.items[menu.selected] {
+            game::Input::ReturnDown => match menu.items[menu.item_selected] {
                 Item::Play { label: _ } => {
                     world.state = game::State::Play;
                     game::initialise_game(&mut world);
@@ -59,5 +72,16 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
             },
             _ => {}
         }
+    }
+}
+
+fn build_mode_item(modes: &Vec<game::Mode>, selected: usize) -> Item {
+    Item::Mode {
+        label: format!(
+            "Mode: {}",
+            match &modes[selected] {
+                game::Mode::Classic { label } | game::Mode::Chill { label } => label,
+            }
+        ),
     }
 }

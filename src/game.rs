@@ -53,6 +53,11 @@ pub enum State {
     GameOver,
 }
 
+pub enum Mode {
+    Classic { label: String },
+    Chill { label: String },
+}
+
 pub enum Input {
     LeftKeyDown,
     RightKeyDown,
