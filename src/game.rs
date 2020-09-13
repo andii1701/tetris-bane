@@ -21,6 +21,11 @@ spawned, complete lines are removed.
 If a block cannot be spawned because the board is full. The block is
 still painted on the board to indicate to the player how the game was
 lost. Then the game ends.
+
+The board has one extra hidden line at the top. This is done to
+prevent an end game where an enpty line is on the top of the board. It
+also has a nice side effect of the block appeeearing to drop into the
+board.
 */
 
 use std::ops::Add;
@@ -33,7 +38,7 @@ use crate::menu;
 
 type Dimension = Position;
 
-pub const BOARD_SIZE: Dimension = Dimension { x: 10, y: 20 };
+pub const BOARD_SIZE: Dimension = Dimension { x: 10, y: 20 + 1 };
 pub const FAST_FALL_RATE: u128 = 25; // milliseconds
 pub const DEFAULT_FALL_RATE: u128 = 500; // milliseconds
 pub const GAME_OVER_PAUSE: u128 = 1000; // milliseconds
@@ -150,8 +155,6 @@ pub fn update(event: &Option<Input>, world: &mut World) {
             if !positions_empty_on_board(&spawned_block.positions, &world.board) {
                 world.state = State::GameOver;
                 world.fall_rate_millis = GAME_OVER_PAUSE;
-                world.board =
-                    paint_positions(&world.board, &spawned_block.positions, spawned_block.color);
             } else {
                 world.block = spawned_block;
                 world.block_orientation = 0;

@@ -72,7 +72,6 @@ fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, world: &game::World
     canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
 
-    // Draw board
     let (canvas_width, canvas_height) = canvas.output_size().unwrap();
     let canvas_mid = Point::new(
         (canvas_width as f32 / 2.) as i32,
@@ -85,51 +84,65 @@ fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, world: &game::World
         canvas_mid.x - (board_width as f32 / 2.) as i32,
         canvas_mid.y - (board_height as f32 / 2.) as i32,
     );
-    (0..game::BOARD_SIZE.y).for_each(|y| {
-        (0..game::BOARD_SIZE.x).for_each(|x| {
-            match world.board[y as usize][x as usize] {
-                Some(color) => canvas.set_draw_color(game_color_to_sdl_color(color)),
-                None => canvas.set_draw_color(BOARD_COLOR),
-            }
-            canvas
-                .fill_rect(Rect::new(
-                    board_origin.x + (BLOCK_SIZE + GAP) * x,
-                    board_origin.y + (BLOCK_SIZE + GAP) * y,
-                    BLOCK_SIZE as u32,
-                    BLOCK_SIZE as u32,
-                ))
-                .unwrap();
-        })
-    });
+    // Draw board
+    {
+        // Don't draw the top row
+        (1..game::BOARD_SIZE.y).for_each(|y| {
+            (0..game::BOARD_SIZE.x).for_each(|x| {
+                match world.board[y as usize][x as usize] {
+                    Some(color) => canvas.set_draw_color(game_color_to_sdl_color(color)),
+                    None => canvas.set_draw_color(BOARD_COLOR),
+                }
+                canvas
+                    .fill_rect(Rect::new(
+                        board_origin.x + (BLOCK_SIZE + GAP) * x,
+                        board_origin.y + (BLOCK_SIZE + GAP) * y,
+                        BLOCK_SIZE as u32,
+                        BLOCK_SIZE as u32,
+                    ))
+                    .unwrap();
+            })
+        });
+    }
     // Draw active block on the board
-    canvas.set_draw_color(game_color_to_sdl_color(world.block.color));
-    world.block.positions.iter().for_each(|&p| {
-        canvas
-            .fill_rect(Rect::new(
-                board_origin.x + (BLOCK_SIZE + GAP) * p.x,
-                board_origin.y + (BLOCK_SIZE + GAP) * p.y,
-                BLOCK_SIZE as u32,
-                BLOCK_SIZE as u32,
-            ))
-            .unwrap();
-    });
+    {
+        canvas.set_draw_color(game_color_to_sdl_color(world.block.color));
+
+        world
+            .block
+            .positions
+            .iter()
+            .filter(|p| p.y != 0) // Don't draw if on the top row
+            .for_each(|&p| {
+                canvas
+                    .fill_rect(Rect::new(
+                        board_origin.x + (BLOCK_SIZE + GAP) * p.x,
+                        board_origin.y + (BLOCK_SIZE + GAP) * p.y,
+                        BLOCK_SIZE as u32,
+                        BLOCK_SIZE as u32,
+                    ))
+                    .unwrap();
+            });
+    }
+
+    let texture_creator = canvas.texture_creator();
 
     // Draw score board
-    let texture_creator = canvas.texture_creator();
-    let font_surface = fonts
-        .score
-        .render(&format!("{}", world.score))
-        .blended(DEFAULT_TEXT_COLOR)
-        .unwrap();
-    let texture = font_surface.as_texture(&texture_creator).unwrap();
-    let mut score_rect = font_surface.rect();
-    let score_board_origin = Point::new(
-        board_origin.x + board_width - score_rect.width() as i32 - 1,
-        board_origin.y + board_height,
-    );
-
-    score_rect.reposition(score_board_origin);
-    canvas.copy(&texture, None, score_rect).unwrap();
+    {
+        let font_surface = fonts
+            .score
+            .render(&format!("{}", world.score))
+            .blended(DEFAULT_TEXT_COLOR)
+            .unwrap();
+        let texture = font_surface.as_texture(&texture_creator).unwrap();
+        let mut score_rect = font_surface.rect();
+        let score_board_origin = Point::new(
+            board_origin.x + board_width - score_rect.width() as i32 - 1,
+            board_origin.y + board_height,
+        );
+        score_rect.reposition(score_board_origin);
+        canvas.copy(&texture, None, score_rect).unwrap();
+    }
 }
 
 fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) {
