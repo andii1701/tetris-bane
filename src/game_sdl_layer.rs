@@ -58,11 +58,12 @@ pub fn update_and_render(
             menu::update(event, &mut world);
             render_menu(&mut canvas, fonts, &world.menu);
         }
-        game::State::Play => {
+        game::State::Play | game::State::GameOver => {
             game::update(event, world);
             render_game(&mut canvas, fonts, &world);
         }
-        _ => {}
+
+        game::State::Quit => {}
     }
 }
 

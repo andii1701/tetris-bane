@@ -79,7 +79,7 @@ pub fn main() {
     let mut show_fps = true;
 
     let mut input_event: Option<game::Input> = None;
-    let mut world = game::initialise();
+    let mut world = game::initialise_world();
 
     while world.state != game::State::Quit {
         let start = timer_subsystem.performance_counter();

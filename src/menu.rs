@@ -28,7 +28,7 @@ pub fn initialise() -> Menu {
     }
 }
 
-pub fn update(event: &Option<game::Input>, world: &mut game::World) {
+pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
     let menu = &mut world.menu;
 
     if let Some(event) = event {
@@ -50,7 +50,10 @@ pub fn update(event: &Option<game::Input>, world: &mut game::World) {
                 menu.selected %= menu.items.len() as usize;
             }
             game::Input::ReturnDown => match menu.items[menu.selected] {
-                Item::Play { label: _ } => world.state = game::State::Play,
+                Item::Play { label: _ } => {
+                    world.state = game::State::Play;
+                    game::initialise_game(&mut world);
+                }
                 Item::Quit { label: _ } => world.state = game::State::Quit,
                 _ => {}
             },

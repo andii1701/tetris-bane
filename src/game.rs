@@ -24,7 +24,7 @@ lost. Then the game ends.
 */
 
 use std::ops::Add;
-use std::time::Instant;
+use std::time;
 
 use crate::block;
 use crate::block::{Block, Delta, Position};
@@ -36,6 +36,7 @@ type Dimension = Position;
 pub const BOARD_SIZE: Dimension = Dimension { x: 10, y: 20 };
 pub const FAST_FALL_RATE: u128 = 25; // milliseconds
 pub const DEFAULT_FALL_RATE: u128 = 500; // milliseconds
+pub const GAME_OVER_PAUSE: u128 = 1000; // milliseconds
 
 type Board = Vec<Vec<Option<block::Color>>>;
 
@@ -44,6 +45,7 @@ pub enum State {
     Play,
     Menu,
     Quit,
+    GameOver,
 }
 
 pub enum Input {
@@ -71,23 +73,30 @@ pub struct World {
     pub block_orientation: u8,
     pub board: Board,
     pub fall_rate_millis: u128, // elapsed ms before blocks drop to next row
-    pub block_drop_clock: Instant,
+    pub block_drop_clock: time::Instant,
     pub score: i32,
     pub menu: menu::Menu,
     pub state: State,
 }
 
-pub fn initialise() -> World {
+pub fn initialise_world() -> World {
     World {
         board: vec![vec![None; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize],
         block: block::spawn(),
         block_orientation: 0,
         fall_rate_millis: DEFAULT_FALL_RATE,
-        block_drop_clock: Instant::now(),
+        block_drop_clock: time::Instant::now(),
         score: 0,
         menu: menu::initialise(),
         state: State::Menu,
     }
+}
+
+pub fn initialise_game(world: &mut World) {
+    world.board = vec![vec![None; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize];
+    world.block = block::spawn();
+    world.block_drop_clock = time::Instant::now();
+    world.fall_rate_millis = DEFAULT_FALL_RATE;
 }
 
 pub fn update(event: &Option<Input>, world: &mut World) {
@@ -121,7 +130,14 @@ pub fn update(event: &Option<Input>, world: &mut World) {
     }
 
     if world.block_drop_clock.elapsed().as_millis() > world.fall_rate_millis {
-        world.block_drop_clock = Instant::now();
+        world.block_drop_clock = time::Instant::now();
+
+        // Having the game over state allows the player to
+        // soak briefly in thier defeat. Rather then a sudden loss.
+        if world.state == State::GameOver {
+            world.state = State::Menu;
+            return;
+        }
 
         // NOTE: We want to handle the case when the block has finished falling in
         // the elapsed time. As this gives the player a chance
@@ -132,9 +148,8 @@ pub fn update(event: &Option<Input>, world: &mut World) {
 
             let spawned_block = block::spawn();
             if !positions_empty_on_board(&spawned_block.positions, &world.board) {
-                println!("Game Over!");
-                // Paint the new block on the board to show how the player lost. If this
-                // does not happen the game could end with an empty line at the top of the board.
+                world.state = State::GameOver;
+                world.fall_rate_millis = GAME_OVER_PAUSE;
                 world.board =
                     paint_positions(&world.board, &spawned_block.positions, spawned_block.color);
             } else {
