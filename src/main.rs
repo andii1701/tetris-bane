@@ -81,7 +81,7 @@ pub fn main() {
     let mut input_event: Option<game::Input> = None;
     let mut world = game::initialise();
 
-    'running: loop {
+    while world.state != game::State::Quit {
         let start = timer_subsystem.performance_counter();
 
         for event in event_pump.poll_iter() {
@@ -90,7 +90,7 @@ pub fn main() {
                 | Event::KeyDown {
                     keycode: Some(Keycode::Escape),
                     ..
-                } => break 'running,
+                } => world.state = game::State::Quit,
                 Event::Window {
                     win_event: WindowEvent::Resized(_width, _height),
                     ..

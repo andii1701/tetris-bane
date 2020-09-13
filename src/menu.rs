@@ -51,6 +51,7 @@ pub fn update(event: &Option<game::Input>, world: &mut game::World) {
             }
             game::Input::ReturnDown => match menu.items[menu.selected] {
                 Item::Play { label: _ } => world.state = game::State::Play,
+                Item::Quit { label: _ } => world.state = game::State::Quit,
                 _ => {}
             },
             _ => {}

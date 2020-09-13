@@ -39,6 +39,7 @@ pub const DEFAULT_FALL_RATE: u128 = 500; // milliseconds
 
 type Board = Vec<Vec<Option<block::Color>>>;
 
+#[derive(PartialEq, Eq)]
 pub enum State {
     Play,
     Menu,
