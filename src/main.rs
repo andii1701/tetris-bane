@@ -135,6 +135,9 @@ pub fn main() {
                     Some(Keycode::Right) => {
                         input_event = Some(game::Input::RightKeyDown);
                     }
+                    Some(Keycode::Return) => {
+                        input_event = Some(game::Input::ReturnDown);
+                    }
                     _ => {}
                 },
                 Event::KeyUp { keycode, .. } => match keycode {

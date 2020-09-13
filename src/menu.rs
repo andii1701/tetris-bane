@@ -8,7 +8,7 @@ pub enum Item {
 
 pub struct Menu {
     pub items: Vec<Item>,
-    pub selected: u8,
+    pub selected: usize,
 }
 
 pub fn initialise() -> Menu {
@@ -28,7 +28,9 @@ pub fn initialise() -> Menu {
     }
 }
 
-pub fn update(event: &Option<game::Input>, menu: &mut Menu) {
+pub fn update(event: &Option<game::Input>, world: &mut game::World) {
+    let menu = &mut world.menu;
+
     if let Some(event) = event {
         match event {
             // NOTE: DownKeyUp needs to be first in the match call otherwise
@@ -37,13 +39,20 @@ pub fn update(event: &Option<game::Input>, menu: &mut Menu) {
             game::Input::LeftKeyDown => {}
             game::Input::RightKeyDown => {}
             game::Input::UpKeyDown => {
-                menu.selected -= 1;
-                menu.selected %= menu.items.len() as u8;
+                menu.selected = if menu.selected as i32 - 1 < 0 {
+                    (menu.items.len() - 1) as usize
+                } else {
+                    (menu.selected - 1) as usize
+                };
             }
             game::Input::DownKeyDown => {
                 menu.selected += 1;
-                menu.selected %= menu.items.len() as u8;
+                menu.selected %= menu.items.len() as usize;
             }
+            game::Input::ReturnDown => match menu.items[menu.selected] {
+                Item::Play { label: _ } => world.state = game::State::Play,
+                _ => {}
+            },
             _ => {}
         }
     }

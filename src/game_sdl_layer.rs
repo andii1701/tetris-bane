@@ -51,16 +51,19 @@ pub fn update_and_render(
     mut canvas: &mut WindowCanvas,
     fonts: &GameFonts,
     event: &Option<game::Input>,
-    world: &mut game::World,
+    mut world: &mut game::World,
 ) {
-    let menu_mode = true;
-    if menu_mode {
-        menu::update(event, &mut world.menu);
-        render_menu(&mut canvas, fonts, &world.menu);
-    } else {
-        game::update(event, world);
-        render_game(&mut canvas, fonts, &world);
-    };
+    match world.state {
+        game::State::Menu => {
+            menu::update(event, &mut world);
+            render_menu(&mut canvas, fonts, &world.menu);
+        }
+        game::State::Play => {
+            game::update(event, world);
+            render_game(&mut canvas, fonts, &world);
+        }
+        _ => {}
+    }
 }
 
 fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, world: &game::World) {
@@ -171,7 +174,6 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) 
             DEFAULT_TEXT_COLOR
         };
 
-        // TODO: Figureout a better way to do this.
         let label = match item {
             menu::Item::Play { label }
             | menu::Item::Quit { label }

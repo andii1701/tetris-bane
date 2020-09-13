@@ -39,12 +39,19 @@ pub const DEFAULT_FALL_RATE: u128 = 500; // milliseconds
 
 type Board = Vec<Vec<Option<block::Color>>>;
 
+pub enum State {
+    Play,
+    Menu,
+    Quit,
+}
+
 pub enum Input {
     LeftKeyDown,
     RightKeyDown,
     UpKeyDown,
     DownKeyDown,
     DownKeyUp,
+    ReturnDown,
 }
 
 impl Add for Position {
@@ -66,6 +73,7 @@ pub struct World {
     pub block_drop_clock: Instant,
     pub score: i32,
     pub menu: menu::Menu,
+    pub state: State,
 }
 
 pub fn initialise() -> World {
@@ -77,6 +85,7 @@ pub fn initialise() -> World {
         block_drop_clock: Instant::now(),
         score: 0,
         menu: menu::initialise(),
+        state: State::Menu,
     }
 }
 
@@ -106,6 +115,7 @@ pub fn update(event: &Option<Input>, world: &mut World) {
             Input::DownKeyDown => {
                 world.fall_rate_millis = FAST_FALL_RATE;
             }
+            _ => {}
         }
     }
 
