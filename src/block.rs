@@ -1,6 +1,6 @@
+use crate::game::Mode;
 use rand::seq::SliceRandom;
 use std::collections::HashMap;
-
 pub type Delta = Position;
 
 type RotationMap = HashMap<Label, Vec<Vec<Delta>>>;
@@ -49,193 +49,211 @@ pub struct Position {
     pub y: i32,
 }
 
-pub fn spawn() -> Block {
+pub fn spawn(mode: &Mode) -> Block {
     let start_offset = 3;
-    let blocks = vec![
-        Block {
-            label: Label::I,
-            positions: vec![
-                Position {
-                    y: 0,
-                    x: 0 + start_offset,
-                },
-                Position {
-                    y: 0,
-                    x: 1 + start_offset,
-                },
-                Position {
-                    y: 0,
-                    x: 2 + start_offset,
-                },
-                Position {
-                    y: 0,
-                    x: 3 + start_offset,
-                },
-            ],
-            color: Color {
-                r: 50,
-                g: 50,
-                b: 255,
+    let i = Block {
+        label: Label::I,
+        positions: vec![
+            Position {
+                y: 0,
+                x: 0 + start_offset,
             },
-        },
-        Block {
-            label: Label::T,
-            positions: vec![
-                Position {
-                    y: 0,
-                    x: 0 + start_offset,
-                },
-                Position {
-                    y: 0,
-                    x: 1 + start_offset,
-                },
-                Position {
-                    y: 0,
-                    x: 2 + start_offset,
-                },
-                Position {
-                    y: 1,
-                    x: 1 + start_offset,
-                },
-            ],
-            color: Color {
-                r: 50,
-                g: 255,
-                b: 50,
+            Position {
+                y: 0,
+                x: 1 + start_offset,
             },
-        },
-        Block {
-            label: Label::O,
-            positions: vec![
-                Position {
-                    y: 0,
-                    x: 0 + start_offset,
-                },
-                Position {
-                    y: 0,
-                    x: 1 + start_offset,
-                },
-                Position {
-                    y: 1,
-                    x: 0 + start_offset,
-                },
-                Position {
-                    y: 1,
-                    x: 1 + start_offset,
-                },
-            ],
-            color: Color {
-                r: 50,
-                g: 255,
-                b: 255,
+            Position {
+                y: 0,
+                x: 2 + start_offset,
             },
-        },
-        Block {
-            label: Label::L,
-            positions: vec![
-                Position {
-                    y: 0,
-                    x: 0 + start_offset,
-                },
-                Position {
-                    y: 0,
-                    x: 1 + start_offset,
-                },
-                Position {
-                    y: 0,
-                    x: 2 + start_offset,
-                },
-                Position {
-                    y: 1,
-                    x: 0 + start_offset,
-                },
-            ],
-            color: Color {
-                r: 255,
-                g: 255,
-                b: 50,
+            Position {
+                y: 0,
+                x: 3 + start_offset,
             },
+        ],
+        color: Color {
+            r: 50,
+            g: 50,
+            b: 255,
         },
-        Block {
-            label: Label::J,
-            positions: vec![
-                Position {
-                    y: 0,
-                    x: 0 + start_offset,
-                },
-                Position {
-                    y: 0,
-                    x: 1 + start_offset,
-                },
-                Position {
-                    y: 0,
-                    x: 2 + start_offset,
-                },
-                Position {
-                    y: 1,
-                    x: 2 + start_offset,
-                },
-            ],
-            color: Color {
-                r: 255,
-                g: 50,
-                b: 255,
+    };
+    let t = Block {
+        label: Label::T,
+        positions: vec![
+            Position {
+                y: 0,
+                x: 0 + start_offset,
             },
-        },
-        Block {
-            label: Label::S,
-            positions: vec![
-                Position {
-                    y: 1,
-                    x: 0 + start_offset,
-                },
-                Position {
-                    y: 1,
-                    x: 1 + start_offset,
-                },
-                Position {
-                    y: 0,
-                    x: 1 + start_offset,
-                },
-                Position {
-                    y: 0,
-                    x: 2 + start_offset,
-                },
-            ],
-            color: Color {
-                r: 255,
-                g: 50,
-                b: 50,
+            Position {
+                y: 0,
+                x: 1 + start_offset,
             },
-        },
-        Block {
-            label: Label::Z,
-            positions: vec![
-                Position {
-                    y: 0,
-                    x: 0 + start_offset,
-                },
-                Position {
-                    y: 0,
-                    x: 1 + start_offset,
-                },
-                Position {
-                    y: 1,
-                    x: 1 + start_offset,
-                },
-                Position {
-                    y: 1,
-                    x: 2 + start_offset,
-                },
-            ],
-            color: Color {
-                r: 255,
-                g: 255,
-                b: 255,
+            Position {
+                y: 0,
+                x: 2 + start_offset,
             },
+            Position {
+                y: 1,
+                x: 1 + start_offset,
+            },
+        ],
+        color: Color {
+            r: 50,
+            g: 255,
+            b: 50,
         },
+    };
+    let o = Block {
+        label: Label::O,
+        positions: vec![
+            Position {
+                y: 0,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 1 + start_offset,
+            },
+        ],
+        color: Color {
+            r: 50,
+            g: 255,
+            b: 255,
+        },
+    };
+    let l = Block {
+        label: Label::L,
+        positions: vec![
+            Position {
+                y: 0,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 2 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 0 + start_offset,
+            },
+        ],
+        color: Color {
+            r: 255,
+            g: 255,
+            b: 50,
+        },
+    };
+    let j = Block {
+        label: Label::J,
+        positions: vec![
+            Position {
+                y: 0,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 2 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 2 + start_offset,
+            },
+        ],
+        color: Color {
+            r: 255,
+            g: 50,
+            b: 255,
+        },
+    };
+    let s = Block {
+        label: Label::S,
+        positions: vec![
+            Position {
+                y: 1,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 2 + start_offset,
+            },
+        ],
+        color: Color {
+            r: 255,
+            g: 50,
+            b: 50,
+        },
+    };
+    let z = Block {
+        label: Label::Z,
+        positions: vec![
+            Position {
+                y: 0,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 2 + start_offset,
+            },
+        ],
+        color: Color {
+            r: 255,
+            g: 255,
+            b: 255,
+        },
+    };
+    let classic_blocks = vec![
+        i.clone(),
+        t.clone(),
+        o.clone(),
+        s.clone(),
+        z.clone(),
+        j.clone(),
+        l.clone(),
     ];
-    blocks.choose(&mut rand::thread_rng()).unwrap().clone()
+    let chill_blocks = vec![o.clone(), i.clone()];
+
+    match mode {
+        Mode::Chill { label: _ } => chill_blocks
+            .choose(&mut rand::thread_rng())
+            .unwrap()
+            .clone(),
+        _ => classic_blocks
+            .choose(&mut rand::thread_rng())
+            .unwrap()
+            .clone(),
+    }
 }
 
 // This method of rotating the block relys on the order of the positions

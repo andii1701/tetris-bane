@@ -45,17 +45,17 @@ pub const GAME_OVER_PAUSE: u128 = 1000; // milliseconds
 
 type Board = Vec<Vec<Option<block::Color>>>;
 
+pub enum Mode {
+    Classic { label: String },
+    Chill { label: String },
+}
+
 #[derive(PartialEq, Eq)]
 pub enum State {
     Play,
     Menu,
     Quit,
     GameOver,
-}
-
-pub enum Mode {
-    Classic { label: String },
-    Chill { label: String },
 }
 
 pub enum Input {
@@ -90,21 +90,22 @@ pub struct World {
 }
 
 pub fn initialise_world() -> World {
+    let menu = menu::initialise();
     World {
         board: vec![vec![None; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize],
-        block: block::spawn(),
+        block: block::spawn(&menu.modes[menu.mode_selected]),
         block_orientation: 0,
         fall_rate_millis: DEFAULT_FALL_RATE,
         block_drop_clock: time::Instant::now(),
         score: 0,
-        menu: menu::initialise(),
+        menu: menu,
         state: State::Menu,
     }
 }
 
 pub fn initialise_game(world: &mut World) {
     world.board = vec![vec![None; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize];
-    world.block = block::spawn();
+    world.block = block::spawn(&world.menu.modes[world.menu.mode_selected]);
     world.block_drop_clock = time::Instant::now();
     world.fall_rate_millis = DEFAULT_FALL_RATE;
 }
@@ -156,7 +157,7 @@ pub fn update(event: &Option<Input>, world: &mut World) {
         if has_block_finished_falling(&world.board, &world.block) {
             world.board = paint_positions(&world.board, &world.block.positions, world.block.color);
 
-            let spawned_block = block::spawn();
+            let spawned_block = block::spawn(&world.menu.modes[world.menu.mode_selected]);
             if !positions_empty_on_board(&spawned_block.positions, &world.board) {
                 world.state = State::GameOver;
                 world.fall_rate_millis = GAME_OVER_PAUSE;
