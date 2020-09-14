@@ -45,22 +45,13 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
 
     if let Some(event) = event {
         match event {
-            game::Input::LeftKeyDown => {}
-            game::Input::RightKeyDown => {
-                menu.mode_selected += 1;
-                menu.mode_selected %= menu.modes.len() as usize;
-                menu.items[1] = build_mode_item(&menu.modes, menu.mode_selected);
-            }
+            game::Input::LeftKeyDown => change_mode(&mut world.menu, -1),
+            game::Input::RightKeyDown => change_mode(&mut world.menu, 1),
             game::Input::UpKeyDown => {
-                menu.item_selected = if menu.item_selected as i32 - 1 < 0 {
-                    (menu.items.len() - 1) as usize
-                } else {
-                    (menu.item_selected - 1) as usize
-                };
+                menu.item_selected = change_index_wrapped(menu.item_selected, -1, menu.items.len());
             }
             game::Input::DownKeyDown => {
-                menu.item_selected += 1;
-                menu.item_selected %= menu.items.len() as usize;
+                menu.item_selected = change_index_wrapped(menu.item_selected, 1, menu.items.len());
             }
             game::Input::ReturnDown => match menu.items[menu.item_selected] {
                 Item::Play { label: _ } => {
@@ -72,6 +63,25 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
             },
             _ => {}
         }
+    }
+}
+
+fn change_mode(menu: &mut Menu, delta: i32) {
+    match menu.items[menu.item_selected] {
+        Item::Mode { label: _ } => {
+            menu.mode_selected = change_index_wrapped(menu.mode_selected, delta, menu.modes.len());
+            menu.items[menu.item_selected] = build_mode_item(&menu.modes, menu.mode_selected);
+        }
+        _ => {}
+    }
+}
+
+fn change_index_wrapped(index: usize, delta: i32, length: usize) -> usize {
+    assert!([-1, 1].contains(&delta), "Delta must be -1 or 1.");
+    if index as i32 + delta < 0 {
+        (length as i32 + delta) as usize
+    } else {
+        ((index as i32 + delta) % length as i32) as usize
     }
 }
 
