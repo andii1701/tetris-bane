@@ -15,6 +15,9 @@ pub struct Menu {
 
 pub fn initialise() -> Menu {
     let modes = vec![
+        game::Mode::Bane {
+            label: "Bane".to_string(),
+        },
         game::Mode::Classic {
             label: "Classic".to_string(),
         },
@@ -88,10 +91,12 @@ fn change_index_wrapped(index: usize, delta: i32, length: usize) -> usize {
 fn build_mode_item(modes: &Vec<game::Mode>, selected: usize) -> Item {
     Item::Mode {
         label: format!(
-            "Mode: {}",
+            "Mode:  < {} >",
             match &modes[selected] {
-                game::Mode::Classic { label } | game::Mode::Chill { label } => label,
-            }
+                game::Mode::Classic { label }
+                | game::Mode::Chill { label }
+                | game::Mode::Bane { label } => label,
+            },
         ),
     }
 }

@@ -48,6 +48,7 @@ type Board = Vec<Vec<Option<block::Color>>>;
 pub enum Mode {
     Classic { label: String },
     Chill { label: String },
+    Bane { label: String },
 }
 
 #[derive(PartialEq, Eq)]
