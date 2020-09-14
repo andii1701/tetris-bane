@@ -46,6 +46,12 @@ enum Label {
     //  XX
     // XX
     // X
+    BaneX,
+    //  X
+    // XXX
+    //  X
+    BaneI,
+    // XXXXX
 }
 
 #[derive(Clone)]
@@ -350,6 +356,68 @@ pub fn spawn(mode: &Mode) -> Block {
         },
     };
 
+    let bane_x = Block {
+        label: Label::BaneX,
+        positions: vec![
+            Position {
+                y: 0,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 2,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 2 + start_offset,
+            },
+        ],
+        color: Color {
+            r: 255,
+            g: 255,
+            b: 255,
+        },
+    };
+
+    let bane_i = Block {
+        label: Label::BaneI,
+        positions: vec![
+            Position {
+                y: 0,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 2 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 3 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 4 + start_offset,
+            },
+        ],
+        color: Color {
+            r: 50,
+            g: 50,
+            b: 255,
+        },
+    };
+
     let classic_blocks = vec![
         i.clone(),
         t.clone(),
@@ -362,7 +430,13 @@ pub fn spawn(mode: &Mode) -> Block {
 
     let chill_blocks = vec![o.clone(), i.clone()];
 
-    let bane_blocks = vec![bane_s.clone()]; //bane_o.clone(), bane_t.clone()];
+    let bane_blocks = vec![
+        bane_x.clone(),
+        bane_s.clone(),
+        bane_o.clone(),
+        bane_t.clone(),
+        bane_i.clone(),
+    ];
 
     match mode {
         Mode::Chill { label: _ } => chill_blocks
@@ -594,6 +668,26 @@ fn rotation_vectors() -> RotationMap {
         ],
     );
 
+    vectors.insert(
+        Label::BaneI,
+        vec![
+            vec![
+                Delta { y: -2, x: 2 },
+                Delta { y: -1, x: 1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 1, x: -1 },
+                Delta { y: 2, x: -2 },
+            ],
+            vec![
+                Delta { y: 2, x: -2 },
+                Delta { y: 1, x: -1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: -1, x: 1 },
+                Delta { y: -2, x: 2 },
+            ],
+        ],
+    );
+
     vectors
 }
 
@@ -605,9 +699,9 @@ pub fn rotate_block(block: &Block, orientation: u8) -> Vec<Position> {
     // special cases
     match block.label {
         // I, S and Z blocks only have 2 orientations
-        Label::I | Label::S | Label::Z => orientation %= 2,
-        // No point rotating the O and baneO square blocks.
-        Label::O | Label::BaneO => return block.positions.clone(),
+        Label::I | Label::S | Label::Z | Label::BaneI => orientation %= 2,
+        // No point rotating the O, baneO baneX square blocks.
+        Label::O | Label::BaneO | Label::BaneX => return block.positions.clone(),
         _ => {}
     }
 
