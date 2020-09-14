@@ -1,12 +1,11 @@
 // TODO
 // menu, with res options, vol control, full screen.
-// See if game font is ok for fps overlay
-// Chill mode
 // Bane mode
-// Pause
+// Pause and esc pauses game
 // fade
-// wsam
 // sound
+// wsam
+// Nicer block colors
 
 use std::path::Path;
 use std::time::Instant;

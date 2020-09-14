@@ -16,9 +16,9 @@ const BLOCK_SIZE: i32 = 25;
 const GAP: i32 = 1;
 
 const DEFAULT_TEXT_COLOR: Color = Color {
-    r: 70,
-    g: 70,
-    b: 70,
+    r: 120,
+    g: 120,
+    b: 120,
     a: 255,
 };
 
