@@ -42,6 +42,10 @@ enum Label {
     // XXX
     // X X
     // XXX
+    BaneS,
+    //  XX
+    // XX
+    // X
 }
 
 #[derive(Clone)]
@@ -315,6 +319,37 @@ pub fn spawn(mode: &Mode) -> Block {
         },
     };
 
+    let bane_s = Block {
+        label: Label::BaneS,
+        positions: vec![
+            Position {
+                y: 2,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 2 + start_offset,
+            },
+        ],
+        color: Color {
+            r: 255,
+            g: 50,
+            b: 50,
+        },
+    };
+
     let classic_blocks = vec![
         i.clone(),
         t.clone(),
@@ -327,7 +362,7 @@ pub fn spawn(mode: &Mode) -> Block {
 
     let chill_blocks = vec![o.clone(), i.clone()];
 
-    let bane_blocks = vec![bane_o.clone(), bane_t.clone()];
+    let bane_blocks = vec![bane_s.clone()]; //bane_o.clone(), bane_t.clone()];
 
     match mode {
         Mode::Chill { label: _ } => chill_blocks
@@ -522,6 +557,39 @@ fn rotation_vectors() -> RotationMap {
                 Delta { y: -2, x: 0 },
                 Delta { y: 0, x: 0 },
                 Delta { y: 1, x: 1 },
+            ],
+        ],
+    );
+    vectors.insert(
+        Label::BaneS,
+        vec![
+            vec![
+                Delta { y: 0, x: 2 },
+                Delta { y: 1, x: 1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 1, x: -1 },
+                Delta { y: 0, x: -2 },
+            ],
+            vec![
+                Delta { y: -2, x: 0 },
+                Delta { y: -1, x: 1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 1, x: 1 },
+                Delta { y: 2, x: 0 },
+            ],
+            vec![
+                Delta { y: 0, x: -2 },
+                Delta { y: -1, x: -1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: -1, x: 1 },
+                Delta { y: 0, x: 2 },
+            ],
+            vec![
+                Delta { y: 2, x: 0 },
+                Delta { y: 1, x: -1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: -1, x: -1 },
+                Delta { y: -2, x: 0 },
             ],
         ],
     );
