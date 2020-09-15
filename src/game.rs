@@ -58,6 +58,7 @@ pub enum State {
     Menu,
     Quit,
     GameOver,
+    Paused,
 }
 
 pub enum Input {
@@ -71,6 +72,8 @@ pub enum Input {
     SpaceKeyUp,
     SKeyDown,
     SKeyUp,
+    EscKeyDown,
+    PKeyDown,
 }
 
 impl Add for Position {
@@ -147,6 +150,10 @@ pub fn update(event: &Option<Input>, world: &mut World) {
             Input::DownKeyDown | Input::SpaceKeyDown | Input::SKeyDown => {
                 world.fall_rate_millis = FAST_FALL_RATE;
             }
+            Input::EscKeyDown | Input::PKeyDown => {
+                world.state = State::Paused;
+                world.menu.items = menu::paused_menu_items();
+            }
             _ => {}
         }
     }
@@ -171,6 +178,7 @@ pub fn update(event: &Option<Input>, world: &mut World) {
             let spawned_block = block::spawn(&world.menu.modes[world.menu.mode_selected]);
             if !positions_empty_on_board(&spawned_block.positions, &world.board) {
                 world.state = State::GameOver;
+                world.menu.items = menu::menu_items(&world.menu.modes, world.menu.mode_selected);
                 world.fall_rate_millis = GAME_OVER_PAUSE;
             } else {
                 world.block = spawned_block;

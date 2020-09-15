@@ -4,6 +4,7 @@ pub enum Item {
     Play { label: String },
     Mode { label: String },
     Quit { label: String },
+    Resume { label: String },
 }
 
 pub struct Menu {
@@ -28,19 +29,34 @@ pub fn initialise() -> Menu {
     let mode_selected = 0;
 
     Menu {
-        items: vec![
-            Item::Play {
-                label: "Play".to_string(),
-            },
-            build_mode_item(&modes, mode_selected),
-            Item::Quit {
-                label: "Quit".to_string(),
-            },
-        ],
+        items: menu_items(&modes, mode_selected),
         item_selected: 0,
         modes: modes,
         mode_selected: mode_selected,
     }
+}
+
+pub fn menu_items(modes: &Vec<game::Mode>, mode_selected: usize) -> Vec<Item> {
+    vec![
+        Item::Play {
+            label: "Play".to_string(),
+        },
+        build_mode_item(modes, mode_selected),
+        Item::Quit {
+            label: "Quit".to_string(),
+        },
+    ]
+}
+
+pub fn paused_menu_items() -> Vec<Item> {
+    vec![
+        Item::Resume {
+            label: "Resume".to_string(),
+        },
+        Item::Quit {
+            label: "Quit".to_string(),
+        },
+    ]
 }
 
 pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
@@ -58,12 +74,15 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
             }
             game::Input::ReturnKeyDown | game::Input::SpaceKeyDown => {
                 match menu.items[menu.item_selected] {
-                    Item::Play { label: _ } => {
+                    Item::Play { .. } => {
                         world.state = game::State::Play;
                         game::initialise_game(&mut world);
                     }
-                    Item::Quit { label: _ } => world.state = game::State::Quit,
-                    Item::Mode { label: _ } => change_mode(&mut world.menu, 1),
+                    Item::Resume { .. } => {
+                        world.state = game::State::Play;
+                    }
+                    Item::Quit { .. } => world.state = game::State::Quit,
+                    Item::Mode { .. } => change_mode(&mut world.menu, 1),
                 }
             }
             _ => {}

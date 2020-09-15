@@ -54,7 +54,7 @@ pub fn update_and_render(
     mut world: &mut game::World,
 ) {
     match world.state {
-        game::State::Menu => {
+        game::State::Menu | game::State::Paused => {
             menu::update(event, &mut world);
             render_menu(&mut canvas, fonts, &world.menu);
         }
@@ -190,7 +190,8 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) 
         let label = match item {
             menu::Item::Play { label }
             | menu::Item::Quit { label }
-            | menu::Item::Mode { label } => label,
+            | menu::Item::Mode { label }
+            | menu::Item::Resume { label } => label,
         };
 
         let font_surface = fonts.menu.render(&label).blended(color).unwrap();

@@ -4,9 +4,8 @@
 // Block colors
 // fade?
 // sound
-// wsam
-// Nicer block colors
 // Rebrand to Tetris Bane
+// wsam
 
 use std::path::Path;
 use std::time::Instant;
@@ -93,11 +92,7 @@ pub fn main() {
 
         for event in event_pump.poll_iter() {
             match event {
-                Event::Quit { .. }
-                | Event::KeyDown {
-                    keycode: Some(Keycode::Escape),
-                    ..
-                } => world.state = game::State::Quit,
+                Event::Quit { .. } => world.state = game::State::Quit,
                 Event::Window {
                     win_event: WindowEvent::Resized(_width, _height),
                     ..
@@ -106,6 +101,9 @@ pub fn main() {
                     Some(Keycode::F1) => {
                         show_fps = !show_fps;
                     }
+
+                    Some(Keycode::Escape) => input_event = Some(game::Input::EscKeyDown),
+
                     /*Some(Keycode::S) => match mixer::Channel::all().play(&sound_chunk, 0) {
                         Err(e) => println!("Error playing sound: {:?}", e),
                         Ok(_) => {}
@@ -138,6 +136,9 @@ pub fn main() {
                     }
                     Some(Keycode::S) => {
                         input_event = Some(game::Input::SKeyDown);
+                    }
+                    Some(Keycode::P) => {
+                        input_event = Some(game::Input::PKeyDown);
                     }
                     Some(Keycode::Left) | Some(Keycode::A) => {
                         input_event = Some(game::Input::LeftKeyDown);
