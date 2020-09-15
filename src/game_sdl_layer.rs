@@ -191,7 +191,8 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) 
             menu::Item::Play { label }
             | menu::Item::Quit { label }
             | menu::Item::Mode { label }
-            | menu::Item::Resume { label } => label,
+            | menu::Item::Resume { label }
+            | menu::Item::EndGame { label } => label,
         };
 
         let font_surface = fonts.menu.render(&label).blended(color).unwrap();

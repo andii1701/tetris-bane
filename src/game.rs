@@ -38,7 +38,7 @@ use crate::menu;
 
 type Dimension = Position;
 
-pub const BANE_BOARD_SIZE: Dimension = Dimension { x: 18, y: 26 + 1 };
+pub const BANE_BOARD_SIZE: Dimension = Dimension { x: 18, y: 24 + 1 };
 pub const CLASSIC_BOARD_SIZE: Dimension = Dimension { x: 10, y: 20 + 1 };
 pub const FAST_FALL_RATE: u128 = 25; // milliseconds
 pub const DEFAULT_FALL_RATE: u128 = 500; // milliseconds
@@ -153,6 +153,7 @@ pub fn update(event: &Option<Input>, world: &mut World) {
             Input::EscKeyDown | Input::PKeyDown => {
                 world.state = State::Paused;
                 world.menu.items = menu::paused_menu_items();
+                world.menu.item_selected = 0;
             }
             _ => {}
         }
@@ -179,6 +180,7 @@ pub fn update(event: &Option<Input>, world: &mut World) {
             if !positions_empty_on_board(&spawned_block.positions, &world.board) {
                 world.state = State::GameOver;
                 world.menu.items = menu::menu_items(&world.menu.modes, world.menu.mode_selected);
+                world.menu.item_selected = 0;
                 world.fall_rate_millis = GAME_OVER_PAUSE;
             } else {
                 world.block = spawned_block;

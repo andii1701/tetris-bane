@@ -5,6 +5,7 @@ pub enum Item {
     Mode { label: String },
     Quit { label: String },
     Resume { label: String },
+    EndGame { label: String },
 }
 
 pub struct Menu {
@@ -53,6 +54,9 @@ pub fn paused_menu_items() -> Vec<Item> {
         Item::Resume {
             label: "Resume".to_string(),
         },
+        Item::EndGame {
+            label: "End Game".to_string(),
+        },
         Item::Quit {
             label: "Quit".to_string(),
         },
@@ -78,6 +82,11 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
                         world.state = game::State::Play;
                         game::initialise_game(&mut world);
                     }
+                    Item::EndGame { .. } => {
+                        world.state = game::State::Menu;
+                        world.menu.item_selected = 0;
+                        world.menu.items = menu_items(&world.menu.modes, world.menu.mode_selected);
+                    }
                     Item::Resume { .. } => {
                         world.state = game::State::Play;
                     }
@@ -85,6 +94,13 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
                     Item::Mode { .. } => change_mode(&mut world.menu, 1),
                 }
             }
+            game::Input::EscKeyDown => match world.state {
+                game::State::Paused => {
+                    world.state = game::State::Play;
+                }
+                game::State::Menu => world.state = game::State::Quit,
+                _ => assert!(false, "Should never be in this menu state."),
+            },
             _ => {}
         }
     }
