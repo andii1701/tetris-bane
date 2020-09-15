@@ -106,10 +106,10 @@ pub fn main() {
                     Some(Keycode::F1) => {
                         show_fps = !show_fps;
                     }
-                    Some(Keycode::S) => match mixer::Channel::all().play(&sound_chunk, 0) {
+                    /*Some(Keycode::S) => match mixer::Channel::all().play(&sound_chunk, 0) {
                         Err(e) => println!("Error playing sound: {:?}", e),
                         Ok(_) => {}
-                    },
+                    },*/
                     Some(Keycode::M) => match Music::is_paused() {
                         true => Music::resume(),
                         false => Music::pause(),
@@ -130,23 +130,26 @@ pub fn main() {
                         }
                         sound_chunk.set_volume(sound_chunk_volume);
                     }
-                    Some(Keycode::Up) => {
+                    Some(Keycode::Up) | Some(Keycode::W) => {
                         input_event = Some(game::Input::UpKeyDown);
                     }
                     Some(Keycode::Down) => {
                         input_event = Some(game::Input::DownKeyDown);
                     }
-                    Some(Keycode::Left) => {
+                    Some(Keycode::S) => {
+                        input_event = Some(game::Input::SKeyDown);
+                    }
+                    Some(Keycode::Left) | Some(Keycode::A) => {
                         input_event = Some(game::Input::LeftKeyDown);
                     }
-                    Some(Keycode::Right) => {
+                    Some(Keycode::Right) | Some(Keycode::D) => {
                         input_event = Some(game::Input::RightKeyDown);
                     }
                     Some(Keycode::Return) => {
-                        input_event = Some(game::Input::ReturnDown);
+                        input_event = Some(game::Input::ReturnKeyDown);
                     }
                     Some(Keycode::Space) => {
-                        input_event = Some(game::Input::SpaceDown);
+                        input_event = Some(game::Input::SpaceKeyDown);
                     }
                     _ => {}
                 },
@@ -154,6 +157,13 @@ pub fn main() {
                     Some(Keycode::Down) => {
                         input_event = Some(game::Input::DownKeyUp);
                     }
+                    Some(Keycode::Space) => {
+                        input_event = Some(game::Input::SpaceKeyUp);
+                    }
+                    Some(Keycode::S) => {
+                        input_event = Some(game::Input::SKeyUp);
+                    }
+
                     _ => {}
                 },
                 _ => {}

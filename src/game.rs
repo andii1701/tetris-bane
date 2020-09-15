@@ -66,8 +66,11 @@ pub enum Input {
     UpKeyDown,
     DownKeyDown,
     DownKeyUp,
-    ReturnDown,
-    SpaceDown,
+    ReturnKeyDown,
+    SpaceKeyDown,
+    SpaceKeyUp,
+    SKeyDown,
+    SKeyUp,
 }
 
 impl Add for Position {
@@ -124,7 +127,7 @@ pub fn update(event: &Option<Input>, world: &mut World) {
             // NOTE: DownKeyUp needs to be first in the match call otherwise
             // the DownKeyUp event will be missed if the user is holding down
             // another key.
-            Input::DownKeyUp => {
+            Input::SKeyUp | Input::SpaceKeyUp | Input::DownKeyUp => {
                 world.fall_rate_millis = DEFAULT_FALL_RATE;
             }
             Input::LeftKeyDown => {
@@ -141,7 +144,7 @@ pub fn update(event: &Option<Input>, world: &mut World) {
                 world.block.positions = positions;
                 world.block_orientation = orientation;
             }
-            Input::DownKeyDown => {
+            Input::DownKeyDown | Input::SpaceKeyDown | Input::SKeyDown => {
                 world.fall_rate_millis = FAST_FALL_RATE;
             }
             _ => {}
