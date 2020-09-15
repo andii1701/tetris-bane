@@ -75,7 +75,11 @@ pub struct Position {
 }
 
 pub fn spawn(mode: &Mode) -> Block {
-    let start_offset = 3;
+    let start_offset = match mode {
+        Mode::Bane { .. } => 7,
+        _ => 3,
+    };
+
     let i = Block {
         label: Label::I,
         positions: vec![
