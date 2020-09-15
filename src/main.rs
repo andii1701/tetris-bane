@@ -1,11 +1,10 @@
 // TODO
 // menu, with res options, vol control, full screen.
-// Pause and esc pauses game
 // Block colors
 // fade?
 // sound
 // Rebrand to Tetris Bane
-// wsam
+// wasm
 
 use std::path::Path;
 use std::time::Instant;

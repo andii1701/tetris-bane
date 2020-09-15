@@ -23,9 +23,9 @@ const DEFAULT_TEXT_COLOR: Color = Color {
 };
 
 const BOARD_COLOR: Color = Color {
-    r: 50,
-    g: 50,
-    b: 50,
+    r: 40,
+    g: 40,
+    b: 40,
     a: 255,
 };
 

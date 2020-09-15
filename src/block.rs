@@ -5,6 +5,48 @@ pub type Delta = Position;
 
 type RotationMap = HashMap<Label, Vec<Vec<Delta>>>;
 
+const RED: Color = Color {
+    r: 219,
+    g: 31,
+    b: 72,
+};
+
+const BLUE: Color = Color {
+    r: 54,
+    g: 97,
+    b: 254,
+};
+
+const GREEN: Color = Color {
+    r: 0,
+    g: 140,
+    b: 54,
+};
+
+const OFF_WHITE: Color = Color {
+    r: 243,
+    g: 238,
+    b: 217,
+};
+
+const PINK: Color = Color {
+    r: 231,
+    g: 141,
+    b: 213,
+};
+
+const TURQUOISE: Color = Color {
+    r: 0,
+    g: 195,
+    b: 218,
+};
+
+const ORANGE: Color = Color {
+    r: 214,
+    g: 49,
+    b: 3,
+};
+
 #[derive(Copy, Clone)]
 pub struct Color {
     pub r: u8,
@@ -100,11 +142,7 @@ pub fn spawn(mode: &Mode) -> Block {
                 x: 3 + start_offset,
             },
         ],
-        color: Color {
-            r: 50,
-            g: 50,
-            b: 255,
-        },
+        color: BLUE,
     };
     let t = Block {
         label: Label::T,
@@ -126,11 +164,7 @@ pub fn spawn(mode: &Mode) -> Block {
                 x: 1 + start_offset,
             },
         ],
-        color: Color {
-            r: 50,
-            g: 255,
-            b: 50,
-        },
+        color: GREEN,
     };
     let o = Block {
         label: Label::O,
@@ -152,11 +186,7 @@ pub fn spawn(mode: &Mode) -> Block {
                 x: 1 + start_offset,
             },
         ],
-        color: Color {
-            r: 50,
-            g: 255,
-            b: 255,
-        },
+        color: TURQUOISE,
     };
     let l = Block {
         label: Label::L,
@@ -178,11 +208,7 @@ pub fn spawn(mode: &Mode) -> Block {
                 x: 0 + start_offset,
             },
         ],
-        color: Color {
-            r: 255,
-            g: 255,
-            b: 50,
-        },
+        color: PINK,
     };
     let j = Block {
         label: Label::J,
@@ -204,11 +230,7 @@ pub fn spawn(mode: &Mode) -> Block {
                 x: 2 + start_offset,
             },
         ],
-        color: Color {
-            r: 255,
-            g: 50,
-            b: 255,
-        },
+        color: ORANGE,
     };
     let s = Block {
         label: Label::S,
@@ -230,11 +252,7 @@ pub fn spawn(mode: &Mode) -> Block {
                 x: 2 + start_offset,
             },
         ],
-        color: Color {
-            r: 255,
-            g: 50,
-            b: 50,
-        },
+        color: RED,
     };
     let z = Block {
         label: Label::Z,
@@ -256,11 +274,7 @@ pub fn spawn(mode: &Mode) -> Block {
                 x: 2 + start_offset,
             },
         ],
-        color: Color {
-            r: 255,
-            g: 255,
-            b: 255,
-        },
+        color: OFF_WHITE,
     };
     let bane_o = Block {
         label: Label::BaneO,
@@ -302,11 +316,7 @@ pub fn spawn(mode: &Mode) -> Block {
                 x: 2 + start_offset,
             },
         ],
-        color: Color {
-            r: 50,
-            g: 255,
-            b: 255,
-        },
+        color: TURQUOISE,
     };
 
     let bane_t = Block {
@@ -333,11 +343,7 @@ pub fn spawn(mode: &Mode) -> Block {
                 x: 1 + start_offset,
             },
         ],
-        color: Color {
-            r: 50,
-            g: 255,
-            b: 50,
-        },
+        color: GREEN,
     };
 
     let bane_s = Block {
@@ -364,11 +370,7 @@ pub fn spawn(mode: &Mode) -> Block {
                 x: 2 + start_offset,
             },
         ],
-        color: Color {
-            r: 255,
-            g: 50,
-            b: 50,
-        },
+        color: RED,
     };
 
     let bane_x = Block {
@@ -395,11 +397,7 @@ pub fn spawn(mode: &Mode) -> Block {
                 x: 2 + start_offset,
             },
         ],
-        color: Color {
-            r: 255,
-            g: 255,
-            b: 255,
-        },
+        color: OFF_WHITE,
     };
 
     let bane_i = Block {
@@ -426,11 +424,7 @@ pub fn spawn(mode: &Mode) -> Block {
                 x: 4 + start_offset,
             },
         ],
-        color: Color {
-            r: 50,
-            g: 50,
-            b: 255,
-        },
+        color: BLUE,
     };
 
     let bane_l = Block {
@@ -457,11 +451,7 @@ pub fn spawn(mode: &Mode) -> Block {
                 x: 0 + start_offset,
             },
         ],
-        color: Color {
-            r: 255,
-            g: 255,
-            b: 50,
-        },
+        color: PINK,
     };
 
     let bane_n = Block {
@@ -488,11 +478,7 @@ pub fn spawn(mode: &Mode) -> Block {
                 x: 2 + start_offset,
             },
         ],
-        color: Color {
-            r: 255,
-            g: 50,
-            b: 255,
-        },
+        color: ORANGE,
     };
 
     let classic_blocks = vec![
