@@ -56,14 +56,16 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
             game::Input::DownKeyDown => {
                 menu.item_selected = change_index_wrapped(menu.item_selected, 1, menu.items.len());
             }
-            game::Input::ReturnDown => match menu.items[menu.item_selected] {
-                Item::Play { label: _ } => {
-                    world.state = game::State::Play;
-                    game::initialise_game(&mut world);
+            game::Input::ReturnDown | game::Input::SpaceDown => {
+                match menu.items[menu.item_selected] {
+                    Item::Play { label: _ } => {
+                        world.state = game::State::Play;
+                        game::initialise_game(&mut world);
+                    }
+                    Item::Quit { label: _ } => world.state = game::State::Quit,
+                    Item::Mode { label: _ } => change_mode(&mut world.menu, 1),
                 }
-                Item::Quit { label: _ } => world.state = game::State::Quit,
-                _ => {}
-            },
+            }
             _ => {}
         }
     }

@@ -125,10 +125,9 @@ fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, world: &game::World
             });
     }
 
-    let texture_creator = canvas.texture_creator();
-
     // Draw score board
     {
+        let texture_creator = canvas.texture_creator();
         let font_surface = fonts
             .score
             .render(&format!("{}", world.score))

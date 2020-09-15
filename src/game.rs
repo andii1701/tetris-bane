@@ -67,6 +67,7 @@ pub enum Input {
     DownKeyDown,
     DownKeyUp,
     ReturnDown,
+    SpaceDown,
 }
 
 impl Add for Position {

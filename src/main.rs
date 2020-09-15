@@ -1,6 +1,5 @@
 // TODO
 // menu, with res options, vol control, full screen.
-// Bane mode
 // Pause and esc pauses game
 // Block colors
 // fade?
@@ -145,6 +144,9 @@ pub fn main() {
                     }
                     Some(Keycode::Return) => {
                         input_event = Some(game::Input::ReturnDown);
+                    }
+                    Some(Keycode::Space) => {
+                        input_event = Some(game::Input::SpaceDown);
                     }
                     _ => {}
                 },
