@@ -1,5 +1,7 @@
 use crate::game;
 
+const GAME_TITLE: &str = "Tetris Bane";
+
 pub enum Item {
     Play { label: String },
     Mode { label: String },
@@ -13,6 +15,7 @@ pub struct Menu {
     pub modes: Vec<game::Mode>,
     pub item_selected: usize,
     pub mode_selected: usize,
+    pub title: String,
 }
 
 pub fn initialise() -> Menu {
@@ -34,6 +37,7 @@ pub fn initialise() -> Menu {
         item_selected: 0,
         modes: modes,
         mode_selected: mode_selected,
+        title: GAME_TITLE.to_string(),
     }
 }
 
@@ -86,9 +90,11 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
                         world.state = game::State::Menu;
                         world.menu.item_selected = 0;
                         world.menu.items = menu_items(&world.menu.modes, world.menu.mode_selected);
+                        world.menu.title = GAME_TITLE.to_string();
                     }
                     Item::Resume { .. } => {
                         world.state = game::State::Play;
+                        world.menu.title = GAME_TITLE.to_string();
                     }
                     Item::Quit { .. } => world.state = game::State::Quit,
                     Item::Mode { .. } => change_mode(&mut world.menu, 1),

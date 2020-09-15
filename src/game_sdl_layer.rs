@@ -165,7 +165,7 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) 
 
     let font_surface = fonts
         .title
-        .render(&"Tetris Bane")
+        .render(&menu.title)
         .blended(DEFAULT_TEXT_COLOR)
         .unwrap();
     let texture = font_surface.as_texture(&texture_creator).unwrap();

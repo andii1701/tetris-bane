@@ -154,6 +154,7 @@ pub fn update(event: &Option<Input>, world: &mut World) {
                 world.state = State::Paused;
                 world.menu.items = menu::paused_menu_items();
                 world.menu.item_selected = 0;
+                world.menu.title = "Paused".to_string();
             }
             _ => {}
         }
