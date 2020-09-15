@@ -38,7 +38,8 @@ use crate::menu;
 
 type Dimension = Position;
 
-pub const BOARD_SIZE: Dimension = Dimension { x: 10, y: 20 + 1 };
+pub const BANE_BOARD_SIZE: Dimension = Dimension { x: 18, y: 26 + 1 };
+pub const CLASSIC_BOARD_SIZE: Dimension = Dimension { x: 10, y: 20 + 1 };
 pub const FAST_FALL_RATE: u128 = 25; // milliseconds
 pub const DEFAULT_FALL_RATE: u128 = 500; // milliseconds
 pub const GAME_OVER_PAUSE: u128 = 1000; // milliseconds
@@ -93,7 +94,7 @@ pub struct World {
 pub fn initialise_world() -> World {
     let menu = menu::initialise();
     World {
-        board: vec![vec![None; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize],
+        board: Vec::new(),
         block: block::spawn(&menu.modes[menu.mode_selected]),
         block_orientation: 0,
         fall_rate_millis: DEFAULT_FALL_RATE,
@@ -105,7 +106,12 @@ pub fn initialise_world() -> World {
 }
 
 pub fn initialise_game(world: &mut World) {
-    world.board = vec![vec![None; BOARD_SIZE.x as usize]; BOARD_SIZE.y as usize];
+    let board_size = match world.menu.modes[world.menu.mode_selected] {
+        Mode::Bane { label: _ } => BANE_BOARD_SIZE,
+        Mode::Classic { label: _ } | Mode::Chill { label: _ } => CLASSIC_BOARD_SIZE,
+    };
+
+    world.board = vec![vec![None; board_size.x as usize]; board_size.y as usize];
     world.block = block::spawn(&world.menu.modes[world.menu.mode_selected]);
     world.block_drop_clock = time::Instant::now();
     world.fall_rate_millis = DEFAULT_FALL_RATE;
@@ -196,7 +202,7 @@ fn move_block(block: &Block, board: &Board, delta: Delta) -> Vec<Position> {
 fn has_block_finished_falling(board: &Board, block: &Block) -> bool {
     block.positions.iter().any(|&p| {
         // Check at bottom of board.
-        if p.y == BOARD_SIZE.y - 1 {
+        if p.y == board.len() as i32 - 1 {
             return true;
         }
         // Check if anything is under the position.
@@ -208,10 +214,10 @@ fn has_block_finished_falling(board: &Board, block: &Block) -> bool {
 }
 
 fn can_move_here(board: &Board, p: Position) -> bool {
-    if !(0..BOARD_SIZE.x).contains(&p.x) {
+    if !(0..board[0].len()).contains(&(p.x as usize)) {
         return false;
     }
-    if !(0..BOARD_SIZE.y).contains(&p.y) {
+    if !(0..board.len()).contains(&(p.y as usize)) {
         return false;
     }
     return !is_occupied(board, p);
@@ -249,7 +255,7 @@ fn delete_full_lines(board: &Board) -> (Board, i32) {
         // Remove full row
         board.remove(i);
         // insert new blank row at the top of the board
-        board.insert(0, vec![None; BOARD_SIZE.x as usize]);
+        board.insert(0, vec![None; board[0].len()]);
     });
 
     count += full_row_indexes.len();

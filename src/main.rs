@@ -2,10 +2,12 @@
 // menu, with res options, vol control, full screen.
 // Bane mode
 // Pause and esc pauses game
-// fade
+// Block colors
+// fade?
 // sound
 // wsam
 // Nicer block colors
+// Rebrand to Tetris Bane
 
 use std::path::Path;
 use std::time::Instant;
