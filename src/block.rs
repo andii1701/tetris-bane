@@ -40,7 +40,7 @@ enum Label {
     //  X
     BaneO,
     // XXX
-    // X X
+    // XXX
     // XXX
     BaneS,
     //  XX
@@ -56,6 +56,9 @@ enum Label {
     // XXX
     // X
     // X
+    BaneN,
+    // XXX
+    // X X
 }
 
 #[derive(Clone)]
@@ -276,6 +279,10 @@ pub fn spawn(mode: &Mode) -> Block {
             },
             Position {
                 y: 1,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 1,
                 x: 2 + start_offset,
             },
             Position {
@@ -453,6 +460,37 @@ pub fn spawn(mode: &Mode) -> Block {
         },
     };
 
+    let bane_n = Block {
+        label: Label::BaneN,
+        positions: vec![
+            Position {
+                y: 0,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 2 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 2 + start_offset,
+            },
+        ],
+        color: Color {
+            r: 255,
+            g: 50,
+            b: 255,
+        },
+    };
+
     let classic_blocks = vec![
         i.clone(),
         t.clone(),
@@ -466,6 +504,7 @@ pub fn spawn(mode: &Mode) -> Block {
     let chill_blocks = vec![o.clone(), i.clone()];
 
     let bane_blocks = vec![
+        bane_n.clone(),
         bane_x.clone(),
         bane_s.clone(),
         bane_o.clone(),
@@ -756,6 +795,39 @@ fn rotation_vectors() -> RotationMap {
             ],
         ],
     );
+    vectors.insert(
+        Label::BaneN,
+        vec![
+            vec![
+                Delta { y: 1, x: 1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: -1, x: -1 },
+                Delta { y: 0, x: 2 },
+                Delta { y: -2, x: 0 },
+            ],
+            vec![
+                Delta { y: -1, x: 1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 1, x: -1 },
+                Delta { y: -2, x: 0 },
+                Delta { y: 0, x: -2 },
+            ],
+            vec![
+                Delta { y: -1, x: -1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 1, x: 1 },
+                Delta { y: 0, x: -2 },
+                Delta { y: 2, x: 0 },
+            ],
+            vec![
+                Delta { y: 1, x: -1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: -1, x: 1 },
+                Delta { y: 2, x: 0 },
+                Delta { y: 0, x: 2 },
+            ],
+        ],
+    );
 
     vectors
 }
@@ -769,7 +841,7 @@ pub fn rotate_block(block: &Block, orientation: u8) -> Vec<Position> {
     match block.label {
         // I, S and Z blocks only have 2 orientations
         Label::I | Label::S | Label::Z | Label::BaneI => orientation %= 2,
-        // No point rotating the O, baneO baneX square blocks.
+        // No point rotating the O, baneO, baneX square blocks.
         Label::O | Label::BaneO | Label::BaneX => return block.positions.clone(),
         _ => {}
     }
