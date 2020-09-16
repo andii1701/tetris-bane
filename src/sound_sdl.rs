@@ -2,11 +2,12 @@ use sdl2::mixer::Music;
 
 use crate::game;
 
+const FADE_DURATION: i32 = 2000; //ms
+
 pub fn handle_music(music: &Music, state: &game::State) {
-    match (state, Music::is_playing(), Music::is_paused()) {
-        (game::State::Paused, true, false) => Music::pause(),
-        (game::State::Play, true, true) => Music::resume(),
-        (game::State::Play, false, false) => music.play(-1).unwrap(),
+    match (state, Music::is_playing()) {
+        (game::State::Menu, true) => Music::fade_out(FADE_DURATION).unwrap(),
+        (game::State::Play, false) => music.fade_in(-1, FADE_DURATION).unwrap(),
         _ => {}
     }
 }
