@@ -6,7 +6,7 @@ pub type Delta = Position;
 type RotationMap = HashMap<Label, Vec<Vec<Delta>>>;
 
 const RED: Color = Color {
-    r: 219,
+    r: 205,
     g: 31,
     b: 72,
 };
@@ -42,7 +42,7 @@ const TURQUOISE: Color = Color {
 };
 
 const ORANGE: Color = Color {
-    r: 214,
+    r: 208,
     g: 49,
     b: 3,
 };
