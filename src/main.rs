@@ -85,8 +85,7 @@ pub fn main() {
     let mut input_event: Option<game::Input> = None;
     let mut world = game::initialise_world();
 
-    let music = Some(Music::from_file("assets/music/music.ogg").unwrap());
-    sound_sdl::handle_music(&music, &world.music_file);
+    let mut music: Option<Music> = None;
 
     while world.state != game::State::Quit {
         let start = timer_subsystem.performance_counter();
@@ -175,6 +174,13 @@ pub fn main() {
         game_sdl_layer::update_and_render(&mut canvas, &game_fonts, &input_event, &mut world);
 
         input_event = None;
+
+        if !world.music_file.is_empty() {
+            match &music {
+                Some(music) => sound_sdl::handle_music(music),
+                None => music = Some(Music::from_file(&world.music_file).unwrap()),
+            }
+        }
 
         if show_fps {
             let font_surface = overlay_font

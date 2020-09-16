@@ -110,7 +110,7 @@ pub fn initialise_world() -> World {
         score: 0,
         menu: menu,
         state: State::Menu,
-        music_file: "assets/music/Kevin_MacLeod_-_Ghost_Dance.ogg".to_string(),
+        music_file: "".to_string(),
     }
 }
 
