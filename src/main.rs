@@ -6,6 +6,8 @@
 // wasm
 // Profile menu and see why its chewing up so much cpu
 // licenses
+// Tidy up menu
+// Menu works with mouse
 
 use std::path::Path;
 use std::time::Instant;
@@ -107,10 +109,6 @@ pub fn main() {
                     /*Some(Keycode::S) => match mixer::Channel::all().play(&sound_chunk, 0) {
                         Err(e) => println!("Error playing sound: {:?}", e),
                         Ok(_) => {}
-                    },*/
-                    /*Some(Keycode::M) => match Music::is_paused() {
-                        true => Music::resume(),
-                        false => Music::pause(),
                     },*/
                     //Some(Keycode::Minus) => Music::set_volume(Music::get_volume() - 8),
                     //Some(Keycode::Equals) => Music::set_volume(Music::get_volume() + 8),

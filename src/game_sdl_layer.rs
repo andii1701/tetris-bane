@@ -193,7 +193,8 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) 
             | menu::Item::Mode { label }
             | menu::Item::Resume { label }
             | menu::Item::EndGame { label }
-            | menu::Item::Music { label } => label,
+            | menu::Item::Music { label }
+            | menu::Item::MusicVolume { label } => label,
         };
 
         let font_surface = fonts.menu.render(&label).blended(color).unwrap();
