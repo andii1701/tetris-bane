@@ -107,12 +107,7 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
                     }
                     Item::Quit { .. } => world.state = game::State::Quit,
                     Item::Mode { .. } => change_mode(&mut menu, 1),
-                    Item::Music { .. } => {
-                        menu.music_toggle = !menu.music_toggle;
-                        menu.items[menu.item_selected] = Item::Music {
-                            label: format!("Music: {}", bool_to_string(menu.music_toggle)),
-                        };
-                    }
+                    Item::Music { .. } => toggle_music(&mut menu),
                 }
             }
             game::Input::EscKeyDown => match world.state {
@@ -127,12 +122,20 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
     }
 }
 
-fn change_mode(menu: &mut Menu, delta: i32) {
+fn toggle_music(menu: &mut Menu) {
+    menu.music_toggle = !menu.music_toggle;
+    menu.items[menu.item_selected] = Item::Music {
+        label: format!("Music: {}", bool_to_string(menu.music_toggle)),
+    };
+}
+
+fn change_mode(mut menu: &mut Menu, delta: i32) {
     match menu.items[menu.item_selected] {
-        Item::Mode { label: _ } => {
+        Item::Mode { .. } => {
             menu.mode_selected = change_index_wrapped(menu.mode_selected, delta, menu.modes.len());
             menu.items[menu.item_selected] = build_mode_item(&menu.modes, menu.mode_selected);
         }
+        Item::Music { .. } => toggle_music(&mut menu),
         _ => {}
     }
 }
