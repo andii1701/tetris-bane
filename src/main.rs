@@ -1,10 +1,11 @@
 // TODO
 // menu, with res options, vol control, full screen.
-// Block colors
 // fade?
 // sound
 // Rebrand to Tetris Bane
 // wasm
+// Profile menu and see why its chewing up so much cpu
+// licenses
 
 use std::path::Path;
 use std::time::Instant;
@@ -20,10 +21,12 @@ mod block;
 mod game;
 mod game_sdl_layer;
 mod menu;
+mod sound;
+mod sound_sdl;
 
 const SYSTEM_FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
 const SOUND_PATH: &str = "assets/sounds/chrip_44.wav";
-const MUSIC_PATH: &str = "assets/music/music.ogg";
+//const MUSIC_PATH: &str = "assets/music/music.ogg";
 
 const OVERLAY_FONT_SIZE: u16 = 12;
 
@@ -47,10 +50,6 @@ pub fn main() {
     // Sound
     let mut sound_chunk = sdl2::mixer::Chunk::from_file(SOUND_PATH).unwrap();
     let mut sound_chunk_volume = sound_chunk.get_volume();
-
-    let music = Music::from_file(MUSIC_PATH).unwrap();
-    music.play(1).unwrap();
-    Music::pause();
 
     let system_font_path: &Path = Path::new(SYSTEM_FONT_PATH);
     let overlay_font = ttf_context
@@ -86,6 +85,9 @@ pub fn main() {
     let mut input_event: Option<game::Input> = None;
     let mut world = game::initialise_world();
 
+    let music = Some(Music::from_file("assets/music/music.ogg").unwrap());
+    sound_sdl::handle_music(&music, &world.music_file);
+
     while world.state != game::State::Quit {
         let start = timer_subsystem.performance_counter();
 
@@ -107,12 +109,12 @@ pub fn main() {
                         Err(e) => println!("Error playing sound: {:?}", e),
                         Ok(_) => {}
                     },*/
-                    Some(Keycode::M) => match Music::is_paused() {
+                    /*Some(Keycode::M) => match Music::is_paused() {
                         true => Music::resume(),
                         false => Music::pause(),
-                    },
-                    Some(Keycode::Minus) => Music::set_volume(Music::get_volume() - 8),
-                    Some(Keycode::Equals) => Music::set_volume(Music::get_volume() + 8),
+                    },*/
+                    //Some(Keycode::Minus) => Music::set_volume(Music::get_volume() - 8),
+                    //Some(Keycode::Equals) => Music::set_volume(Music::get_volume() + 8),
                     Some(Keycode::Num9) => {
                         sound_chunk_volume -= 8;
                         if sound_chunk_volume < 0 {
@@ -185,7 +187,7 @@ pub fn main() {
 
         canvas.present();
 
-        if wallclock.elapsed().as_millis() > 333 {
+        if show_fps && wallclock.elapsed().as_millis() > 333 {
             let end = timer_subsystem.performance_counter();
             let elapsed = (end - start) as f32 / timer_subsystem.performance_frequency() as f32;
             fps = (1.0 / elapsed as f32) as u32;

@@ -1,4 +1,5 @@
 use crate::game;
+use crate::sound;
 
 const GAME_TITLE: &str = "Tetris Bane";
 
@@ -84,6 +85,8 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
                 match menu.items[menu.item_selected] {
                     Item::Play { .. } => {
                         world.state = game::State::Play;
+                        world.music_file =
+                            sound::music_path(&world.menu.modes[world.menu.mode_selected]);
                         game::initialise_game(&mut world);
                     }
                     Item::EndGame { .. } => {

@@ -96,6 +96,7 @@ pub struct World {
     pub score: i32,
     pub menu: menu::Menu,
     pub state: State,
+    pub music_file: String,
 }
 
 pub fn initialise_world() -> World {
@@ -109,6 +110,7 @@ pub fn initialise_world() -> World {
         score: 0,
         menu: menu,
         state: State::Menu,
+        music_file: "assets/music/Kevin_MacLeod_-_Ghost_Dance.ogg".to_string(),
     }
 }
 
