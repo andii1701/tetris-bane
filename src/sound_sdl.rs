@@ -1,9 +1,12 @@
 use sdl2::mixer::Music;
 
-pub fn handle_music(music: &Music) {
-    if !Music::is_playing() {
-        music.play(1).unwrap();
-    }
+use crate::game;
 
-    //Music::pause();
+pub fn handle_music(music: &Music, state: &game::State) {
+    match (state, Music::is_playing(), Music::is_paused()) {
+        (game::State::Paused, true, false) => Music::pause(),
+        (game::State::Play, true, true) => Music::resume(),
+        (game::State::Play, false, false) => music.play(-1).unwrap(),
+        _ => {}
+    }
 }

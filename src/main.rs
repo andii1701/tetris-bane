@@ -177,7 +177,7 @@ pub fn main() {
 
         if !world.music_file.is_empty() {
             match &music {
-                Some(music) => sound_sdl::handle_music(music),
+                Some(music) => sound_sdl::handle_music(music, &world.state),
                 None => music = Some(Music::from_file(&world.music_file).unwrap()),
             }
         }
