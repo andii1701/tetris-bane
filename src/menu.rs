@@ -9,6 +9,7 @@ pub enum Item {
     Quit { label: String },
     Resume { label: String },
     EndGame { label: String },
+    Music { label: String },
 }
 
 pub struct Menu {
@@ -17,6 +18,7 @@ pub struct Menu {
     pub item_selected: usize,
     pub mode_selected: usize,
     pub title: String,
+    pub music_toggle: bool,
 }
 
 pub fn initialise() -> Menu {
@@ -32,22 +34,27 @@ pub fn initialise() -> Menu {
         },
     ];
     let mode_selected = 0;
+    let music_toggle = true;
 
     Menu {
-        items: menu_items(&modes, mode_selected),
+        items: menu_items(&modes, mode_selected, music_toggle),
         item_selected: 0,
         modes: modes,
         mode_selected: mode_selected,
         title: GAME_TITLE.to_string(),
+        music_toggle: music_toggle,
     }
 }
 
-pub fn menu_items(modes: &Vec<game::Mode>, mode_selected: usize) -> Vec<Item> {
+pub fn menu_items(modes: &Vec<game::Mode>, mode_selected: usize, music_toggle: bool) -> Vec<Item> {
     vec![
         Item::Play {
             label: "Play".to_string(),
         },
         build_mode_item(modes, mode_selected),
+        Item::Music {
+            label: format!("Music: {}", bool_to_string(music_toggle)),
+        },
         Item::Quit {
             label: "Quit".to_string(),
         },
@@ -69,7 +76,7 @@ pub fn paused_menu_items() -> Vec<Item> {
 }
 
 pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
-    let menu = &mut world.menu;
+    let mut menu = &mut world.menu;
 
     if let Some(event) = event {
         match event {
@@ -85,14 +92,13 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
                 match menu.items[menu.item_selected] {
                     Item::Play { .. } => {
                         world.state = game::State::Play;
-                        world.music_file =
-                            sound::music_path(&world.menu.modes[world.menu.mode_selected]);
+                        world.music_file = sound::music_path(&menu.modes[menu.mode_selected]);
                         game::initialise_game(&mut world);
                     }
                     Item::EndGame { .. } => {
                         world.state = game::State::Menu;
-                        world.menu.item_selected = 0;
-                        world.menu.items = menu_items(&world.menu.modes, world.menu.mode_selected);
+                        menu.item_selected = 0;
+                        menu.items = menu_items(&menu.modes, menu.mode_selected, menu.music_toggle);
                         world.menu.title = GAME_TITLE.to_string();
                     }
                     Item::Resume { .. } => {
@@ -100,7 +106,13 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
                         world.menu.title = GAME_TITLE.to_string();
                     }
                     Item::Quit { .. } => world.state = game::State::Quit,
-                    Item::Mode { .. } => change_mode(&mut world.menu, 1),
+                    Item::Mode { .. } => change_mode(&mut menu, 1),
+                    Item::Music { .. } => {
+                        menu.music_toggle = !menu.music_toggle;
+                        menu.items[menu.item_selected] = Item::Music {
+                            label: format!("Music: {}", bool_to_string(menu.music_toggle)),
+                        };
+                    }
                 }
             }
             game::Input::EscKeyDown => match world.state {
@@ -144,5 +156,12 @@ fn build_mode_item(modes: &Vec<game::Mode>, selected: usize) -> Item {
                 | game::Mode::Bane { label } => label,
             },
         ),
+    }
+}
+
+fn bool_to_string(b: bool) -> String {
+    match b {
+        true => "On".to_string(),
+        false => "Off".to_string(),
     }
 }

@@ -182,7 +182,11 @@ pub fn update(event: &Option<Input>, world: &mut World) {
             let spawned_block = block::spawn(&world.menu.modes[world.menu.mode_selected]);
             if !positions_empty_on_board(&spawned_block.positions, &world.board) {
                 world.state = State::GameOver;
-                world.menu.items = menu::menu_items(&world.menu.modes, world.menu.mode_selected);
+                world.menu.items = menu::menu_items(
+                    &world.menu.modes,
+                    world.menu.mode_selected,
+                    world.menu.music_toggle,
+                );
                 world.menu.item_selected = 0;
                 world.fall_rate_millis = GAME_OVER_PAUSE;
             } else {
