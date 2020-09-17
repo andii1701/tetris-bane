@@ -1,11 +1,8 @@
 // TODO
-// menu, with res options, vol control, full screen.
-// fade?
-// different music
-// Rebrand to Tetris Bane
+// Fix bug in J piece
 // wasm
 // Profile menu and see why its chewing up so much cpu
-// licenses
+// licenses, external and mine
 // Tidy up menu code
 // Menu works with mouse
 

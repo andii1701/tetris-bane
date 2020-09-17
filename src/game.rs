@@ -124,6 +124,8 @@ pub fn initialise_game(world: &mut World) {
     world.block = block::spawn(&world.menu.modes[world.menu.mode_selected]);
     world.block_drop_clock = time::Instant::now();
     world.fall_rate_millis = DEFAULT_FALL_RATE;
+    world.score = 0;
+    world.block_orientation = 0;
 }
 
 pub fn update(event: &Option<Input>, world: &mut World) {
