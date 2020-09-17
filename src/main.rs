@@ -28,7 +28,6 @@ mod sound_sdl;
 
 const SYSTEM_FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
 const SOUND_PATH: &str = "assets/sounds/chrip_44.wav";
-//const MUSIC_PATH: &str = "assets/music/music.ogg";
 
 const OVERLAY_FONT_SIZE: u16 = 12;
 
@@ -88,6 +87,7 @@ pub fn main() {
     let mut world = game::initialise_world();
 
     let mut music: Option<Music> = None;
+    Music::set_volume(world.menu.music_volume);
 
     while world.state != game::State::Quit {
         let start = timer_subsystem.performance_counter();
@@ -175,9 +175,12 @@ pub fn main() {
 
         if !world.music_file.is_empty() {
             match &music {
-                Some(music) => {
-                    sound_sdl::handle_music(music, &world.state, world.menu.music_toggle)
-                }
+                Some(music) => sound_sdl::handle_music(
+                    music,
+                    &world.state,
+                    world.menu.music_toggle,
+                    world.menu.music_volume,
+                ),
                 None => music = Some(Music::from_file(&world.music_file).unwrap()),
             }
         }

@@ -20,7 +20,7 @@ pub struct Menu {
     pub mode_selected: usize,
     pub title: String,
     pub music_toggle: bool,
-    pub music_volume: u8,
+    pub music_volume: i32,
 }
 
 pub fn initialise() -> Menu {
@@ -37,7 +37,7 @@ pub fn initialise() -> Menu {
     ];
     let mode_selected = 0;
     let music_toggle = true;
-    let music_volume = 50;
+    let music_volume = 70;
 
     Menu {
         items: menu_items(&modes, mode_selected, music_toggle, music_volume),
@@ -54,7 +54,7 @@ pub fn menu_items(
     modes: &Vec<game::Mode>,
     mode_selected: usize,
     music_toggle: bool,
-    music_volume: u8,
+    music_volume: i32,
 ) -> Vec<Item> {
     vec![
         Item::Play {
@@ -73,7 +73,7 @@ pub fn menu_items(
     ]
 }
 
-pub fn paused_menu_items(music_toggle: bool, music_volume: u8) -> Vec<Item> {
+pub fn paused_menu_items(music_toggle: bool, music_volume: i32) -> Vec<Item> {
     vec![
         Item::Resume {
             label: "Resume".to_string(),
@@ -82,7 +82,7 @@ pub fn paused_menu_items(music_toggle: bool, music_volume: u8) -> Vec<Item> {
             label: "End Game".to_string(),
         },
         Item::Music {
-            label: format!("Music: {}", volume_string(music_volume)),
+            label: format!("Music: {}", bool_to_string(music_toggle)),
         },
         Item::MusicVolume {
             label: volume_string(music_volume),
@@ -161,11 +161,11 @@ fn shift_left_or_right(mut menu: &mut Menu, delta: i32) {
         }
         Item::Music { .. } => toggle_music(&mut menu),
         Item::MusicVolume { .. } => {
-            let volume = menu.music_volume as i32 + delta * 10;
+            let volume = menu.music_volume + delta * 10;
             menu.music_volume = match volume {
                 volume if volume < 0 => 0,
                 volume if volume > 128 => 128,
-                _ => volume as u8,
+                _ => volume,
             };
             menu.items[menu.item_selected] = Item::MusicVolume {
                 label: volume_string(menu.music_volume),
@@ -205,7 +205,7 @@ fn bool_to_string(b: bool) -> String {
     }
 }
 
-fn volume_string(volume: u8) -> String {
+fn volume_string(volume: i32) -> String {
     let n_dots = (volume as f32 / 10.) as usize;
     let n_spaces = 12 - n_dots;
     format!(

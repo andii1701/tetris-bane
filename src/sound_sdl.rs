@@ -4,7 +4,11 @@ use crate::game;
 
 const FADE_DURATION: i32 = 2000; //ms
 
-pub fn handle_music(music: &Music, state: &game::State, toggle: bool) {
+pub fn handle_music(music: &Music, state: &game::State, toggle: bool, volume: i32) {
+    if Music::get_volume() != volume {
+        Music::set_volume(volume)
+    }
+
     match (state, Music::is_playing(), toggle) {
         // Game is in menu and music is playing
         (game::State::Menu, true, _) => Music::fade_out(FADE_DURATION).unwrap(),
