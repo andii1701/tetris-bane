@@ -1,9 +1,6 @@
-# rust-tetris-sdl
+# Tetris Bane
 
-A simple Tetris clone written in Rust using SDL2
-
-# licensed content
- https://incompetech.filmmusic.io/song/4383-sneaky-adventure
+A Tetris clone, with a couple of twists. Written in Rust using SDL.
 
 # Usful links
 
@@ -20,3 +17,18 @@ A simple Tetris clone written in Rust using SDL2
  * https://depth-first.com/articles/2020/06/29/compiling-rust-to-webassembly-a-simple-example/
 
  * https://github.com/gliheng/rust-wasm/blob/master/sdl2-drag/Makefile
+
+
+# Kevin Macleod licenses:
+
+A Very Brady Special by Kevin MacLeod
+Link: https://filmmusic.io/song/5760-a-very-brady-special
+License: http://creativecommons.org/licenses/by/4.0/
+
+Midnight Tale by Kevin MacLeod
+Link: https://incompetech.filmmusic.io/song/4710-midnight-tale
+License: http://creativecommons.org/licenses/by/4.0/
+
+Ghost Dance by Kevin MacLeod
+Link: https://incompetech.filmmusic.io/song/3802-ghost-dance
+License: http://creativecommons.org/licenses/by/4.0/

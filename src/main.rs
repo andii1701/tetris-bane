@@ -27,7 +27,6 @@ mod sound;
 mod sound_sdl;
 
 const SYSTEM_FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
-const SOUND_PATH: &str = "assets/sounds/chrip_44.wav";
 
 const OVERLAY_FONT_SIZE: u16 = 12;
 
@@ -47,10 +46,6 @@ pub fn main() {
     sdl2::mixer::open_audio(44_100, mixer::DEFAULT_FORMAT, mixer::DEFAULT_CHANNELS, 1024).unwrap();
     sdl2::mixer::init(mixer::InitFlag::OGG).unwrap();
     sdl2::mixer::allocate_channels(2);
-
-    // Sound
-    let mut sound_chunk = sdl2::mixer::Chunk::from_file(SOUND_PATH).unwrap();
-    let mut sound_chunk_volume = sound_chunk.get_volume();
 
     let system_font_path: &Path = Path::new(SYSTEM_FONT_PATH);
     let overlay_font = ttf_context
@@ -81,12 +76,13 @@ pub fn main() {
     let mut fps_string: String = " ".to_string();
     let mut fps = 60;
     let mut wallclock = Instant::now();
-    let mut show_fps = true;
+    let mut show_fps = false;
 
     let mut input_event: Option<game::Input> = None;
     let mut world = game::initialise_world();
 
     let mut music: Option<Music> = None;
+    let mut music_playing = "".to_string();
     Music::set_volume(world.menu.music_volume);
 
     while world.state != game::State::Quit {
@@ -106,26 +102,6 @@ pub fn main() {
 
                     Some(Keycode::Escape) => input_event = Some(game::Input::EscKeyDown),
 
-                    /*Some(Keycode::S) => match mixer::Channel::all().play(&sound_chunk, 0) {
-                        Err(e) => println!("Error playing sound: {:?}", e),
-                        Ok(_) => {}
-                    },*/
-                    //Some(Keycode::Minus) => Music::set_volume(Music::get_volume() - 8),
-                    //Some(Keycode::Equals) => Music::set_volume(Music::get_volume() + 8),
-                    Some(Keycode::Num9) => {
-                        sound_chunk_volume -= 8;
-                        if sound_chunk_volume < 0 {
-                            sound_chunk_volume = 0;
-                        }
-                        sound_chunk.set_volume(sound_chunk_volume);
-                    }
-                    Some(Keycode::Num0) => {
-                        sound_chunk_volume += 8;
-                        if sound_chunk_volume > 128 {
-                            sound_chunk_volume = 128;
-                        }
-                        sound_chunk.set_volume(sound_chunk_volume);
-                    }
                     Some(Keycode::Up) | Some(Keycode::W) => {
                         input_event = Some(game::Input::UpKeyDown);
                     }
@@ -174,6 +150,11 @@ pub fn main() {
         input_event = None;
 
         if !world.music_file.is_empty() {
+            if world.music_file != music_playing {
+                music = None;
+                music_playing = world.music_file.to_string();
+            }
+
             match &music {
                 Some(music) => sound_sdl::handle_music(
                     music,
