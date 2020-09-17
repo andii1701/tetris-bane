@@ -11,6 +11,7 @@ use crate::menu;
 use crate::block;
 
 const GAME_FONT_PATH: &str = "assets/fonts/muli/Muli.ttf";
+const SETTINGS_FONT_PATH: &str = "assets/fonts/JetBrainsMono-2.001/ttf/JetBrainsMono-Regular.ttf";
 
 const BLOCK_SIZE: i32 = 25;
 const GAP: i32 = 1;
@@ -32,18 +33,20 @@ const BOARD_COLOR: Color = Color {
 pub struct GameFonts<'ttf> {
     score: Font<'ttf, 'static>,
     title: Font<'ttf, 'static>,
-    menu: Font<'ttf, 'static>,
+    settings: Font<'ttf, 'static>,
 }
 
 pub fn initialise_fonts(ttf_context: &Sdl2TtfContext) -> GameFonts {
     let game_font_path: &Path = Path::new(GAME_FONT_PATH);
     let score_font = ttf_context.load_font(game_font_path, 22).unwrap();
     let title_font = ttf_context.load_font(game_font_path, 50).unwrap();
-    let menu_font = ttf_context.load_font(game_font_path, 35).unwrap();
+
+    let settings_font_path: &Path = Path::new(SETTINGS_FONT_PATH);
+    let settings_font = ttf_context.load_font(settings_font_path, 30).unwrap();
     GameFonts {
         score: score_font,
         title: title_font,
-        menu: menu_font,
+        settings: settings_font,
     }
 }
 
@@ -161,7 +164,7 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) 
     let texture_creator = canvas.texture_creator();
 
     // Draw title
-    let title_offset_from_center = 90;
+    let title_offset_from_center = 150;
 
     let font_surface = fonts
         .title
@@ -179,7 +182,7 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) 
     canvas.copy(&texture, None, title_rect).unwrap();
 
     // Draw menu
-    let mut text_offset = 20;
+    let mut text_offset = 50;
     menu.items.iter().enumerate().for_each(|(index, item)| {
         let color = if index == menu.item_selected as usize {
             selected_text_color
@@ -197,7 +200,7 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) 
             | menu::Item::MusicVolume { label } => label,
         };
 
-        let font_surface = fonts.menu.render(&label).blended(color).unwrap();
+        let font_surface = fonts.settings.render(&label).blended(color).unwrap();
         let texture = font_surface.as_texture(&texture_creator).unwrap();
         let mut menu_rect = font_surface.rect();
         let menu_origin = Point::new(

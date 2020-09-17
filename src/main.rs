@@ -1,12 +1,12 @@
 // TODO
 // menu, with res options, vol control, full screen.
 // fade?
-// sound
+// different music
 // Rebrand to Tetris Bane
 // wasm
 // Profile menu and see why its chewing up so much cpu
 // licenses
-// Tidy up menu
+// Tidy up menu code
 // Menu works with mouse
 
 use std::path::Path;

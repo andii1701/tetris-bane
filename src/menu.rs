@@ -3,6 +3,8 @@ use crate::sound;
 
 const GAME_TITLE: &str = "Tetris Bane";
 
+const LABEL_LENGTH: usize = 22;
+
 pub enum Item {
     Play { label: String },
     Mode { label: String },
@@ -58,17 +60,17 @@ pub fn menu_items(
 ) -> Vec<Item> {
     vec![
         Item::Play {
-            label: "Play".to_string(),
+            label: "Play                  ".to_string(),
         },
         build_mode_item(modes, mode_selected),
         Item::Music {
-            label: format!("Music: {}", bool_to_string(music_toggle)),
+            label: music_label(music_toggle),
         },
         Item::MusicVolume {
-            label: volume_string(music_volume),
+            label: volume_label(music_volume),
         },
         Item::Quit {
-            label: "Quit".to_string(),
+            label: "Quit                  ".to_string(),
         },
     ]
 }
@@ -76,19 +78,19 @@ pub fn menu_items(
 pub fn paused_menu_items(music_toggle: bool, music_volume: i32) -> Vec<Item> {
     vec![
         Item::Resume {
-            label: "Resume".to_string(),
+            label: "Resume                ".to_string(),
         },
         Item::EndGame {
-            label: "End Game".to_string(),
+            label: "End Game              ".to_string(),
         },
         Item::Music {
-            label: format!("Music: {}", bool_to_string(music_toggle)),
+            label: music_label(music_toggle),
         },
         Item::MusicVolume {
-            label: volume_string(music_volume),
+            label: volume_label(music_volume),
         },
         Item::Quit {
-            label: "Quit".to_string(),
+            label: "Quit                  ".to_string(),
         },
     ]
 }
@@ -149,7 +151,7 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
 fn toggle_music(menu: &mut Menu) {
     menu.music_toggle = !menu.music_toggle;
     menu.items[menu.item_selected] = Item::Music {
-        label: format!("Music: {}", bool_to_string(menu.music_toggle)),
+        label: music_label(menu.music_toggle),
     };
 }
 
@@ -168,7 +170,7 @@ fn shift_left_or_right(mut menu: &mut Menu, delta: i32) {
                 _ => volume,
             };
             menu.items[menu.item_selected] = Item::MusicVolume {
-                label: volume_string(menu.music_volume),
+                label: volume_label(menu.music_volume),
             };
         }
 
@@ -187,30 +189,38 @@ fn change_index_wrapped(index: usize, delta: i32, length: usize) -> usize {
 
 fn build_mode_item(modes: &Vec<game::Mode>, selected: usize) -> Item {
     Item::Mode {
-        label: format!(
-            "Mode:  < {} >",
-            match &modes[selected] {
-                game::Mode::Classic { label }
-                | game::Mode::Chill { label }
-                | game::Mode::Bane { label } => label,
-            },
-        ),
+        label: mode_label(&modes[selected]),
     }
 }
 
-fn bool_to_string(b: bool) -> String {
-    match b {
-        true => "On".to_string(),
-        false => "Off".to_string(),
-    }
+fn mode_label(mode: &game::Mode) -> String {
+    let prefix = "Mode:";
+    let mode = format!(
+        "{}",
+        match mode {
+            game::Mode::Classic { label }
+            | game::Mode::Chill { label }
+            | game::Mode::Bane { label } => label,
+        }
+    );
+
+    let padding = " ".repeat(LABEL_LENGTH - prefix.len() - mode.len());
+    format!("{}{}{}", prefix, padding, mode)
 }
 
-fn volume_string(volume: i32) -> String {
+fn volume_label(volume: i32) -> String {
     let n_dots = (volume as f32 / 10.) as usize;
     let n_spaces = 12 - n_dots;
-    format!(
-        "Volume: < |{}{}| >",
-        ".".repeat(n_dots),
-        " ".repeat(n_spaces)
-    )
+    format!("Volume: |{}{}|", ".".repeat(n_dots), " ".repeat(n_spaces))
+}
+
+fn music_label(toggle: bool) -> String {
+    let prefix = "Music:";
+    let toggle = match toggle {
+        true => "On".to_string(),
+        false => "Off".to_string(),
+    };
+
+    let padding = " ".repeat(LABEL_LENGTH - prefix.len() - toggle.len());
+    format!("{}{}{}", prefix, padding, toggle)
 }
