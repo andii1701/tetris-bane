@@ -148,9 +148,8 @@ pub fn initialise_game(mode_selected: usize) -> Game {
     }
 }
 
-pub fn update(event: &Option<Input>, world: &mut World) -> State {
-    let mut game = &mut world.game;
-    let mut state = State::Play;
+pub fn update(event: &Option<Input>, game: &mut Game, state: &State) -> State {
+    let mut game_state = State::Play;
     if let Some(event) = event {
         match event {
             // NOTE: DownKeyUp needs to be first in the match call otherwise
@@ -174,7 +173,7 @@ pub fn update(event: &Option<Input>, world: &mut World) -> State {
             Input::DownKeyDown | Input::SpaceKeyDown | Input::SKeyDown => {
                 game.fall_rate_millis = FAST_FALL_RATE;
             }
-            Input::EscKeyDown | Input::PKeyDown => state = State::Paused,
+            Input::EscKeyDown | Input::PKeyDown => game_state = State::Paused,
             _ => {}
         }
     }
@@ -184,7 +183,7 @@ pub fn update(event: &Option<Input>, world: &mut World) -> State {
 
         // Having the game over state allows the player to
         // soak briefly in thier defeat. Rather then a sudden loss.
-        if world.state == State::GameOver {
+        if *state == State::GameOver {
             return State::Menu;
         }
 
@@ -197,7 +196,7 @@ pub fn update(event: &Option<Input>, world: &mut World) -> State {
 
             let spawned_block = block::spawn(&game.modes[game.mode_selected]);
             if !positions_empty_on_board(&spawned_block.positions, &game.board) {
-                state = State::GameOver;
+                game_state = State::GameOver;
                 game.fall_rate_millis = GAME_OVER_PAUSE;
             } else {
                 game.block = spawned_block;
@@ -207,12 +206,12 @@ pub fn update(event: &Option<Input>, world: &mut World) -> State {
             let (board, score) = delete_full_lines(&game.board);
             game.board = board;
             game.score += score;
-            return state;
+            return game_state;
         }
         // Move block one square down.
         game.block.positions = move_block(&game.block, &game.board, Delta { y: 1, x: 0 });
     }
-    state
+    return game_state;
 }
 
 fn paint_positions(board: &Board, positions: &Vec<Position>, color: block::Color) -> Board {

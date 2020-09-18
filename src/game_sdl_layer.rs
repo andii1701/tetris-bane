@@ -62,7 +62,7 @@ pub fn update_and_render(
             render_menu(&mut canvas, fonts, &world.menu);
         }
         game::State::Play | game::State::GameOver => {
-            match game::update(event, world) {
+            match game::update(event, &mut world.game, &world.state) {
                 game::State::Paused => {
                     world.state = game::State::Paused;
                     world.menu.items =
