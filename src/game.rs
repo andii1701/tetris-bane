@@ -129,8 +129,9 @@ pub fn initialise_game(mode: &Mode) -> Game {
     }
 }
 
-pub fn update(event: &Option<Input>, world: &mut World) {
+pub fn update(event: &Option<Input>, world: &mut World) -> State {
     let mut game = &mut world.game;
+    let mut state = State::Play;
     if let Some(event) = event {
         match event {
             // NOTE: DownKeyUp needs to be first in the match call otherwise
@@ -154,13 +155,7 @@ pub fn update(event: &Option<Input>, world: &mut World) {
             Input::DownKeyDown | Input::SpaceKeyDown | Input::SKeyDown => {
                 game.fall_rate_millis = FAST_FALL_RATE;
             }
-            Input::EscKeyDown | Input::PKeyDown => {
-                world.state = State::Paused;
-                world.menu.items =
-                    menu::paused_menu_items(world.menu.music_toggle, world.menu.music_volume);
-                world.menu.item_selected = 0;
-                world.menu.title = "Paused".to_string();
-            }
+            Input::EscKeyDown | Input::PKeyDown => state = State::Paused,
             _ => {}
         }
     }
@@ -172,7 +167,7 @@ pub fn update(event: &Option<Input>, world: &mut World) {
         // soak briefly in thier defeat. Rather then a sudden loss.
         if world.state == State::GameOver {
             world.state = State::Menu;
-            return;
+            return state;
         }
 
         // NOTE: We want to handle the case when the block has finished falling in
@@ -201,11 +196,12 @@ pub fn update(event: &Option<Input>, world: &mut World) {
             let (board, score) = delete_full_lines(&game.board);
             game.board = board;
             game.score += score;
-            return;
+            return state;
         }
         // Move block one square down.
         game.block.positions = move_block(&game.block, &game.board, Delta { y: 1, x: 0 });
     }
+    state
 }
 
 fn paint_positions(board: &Board, positions: &Vec<Position>, color: block::Color) -> Board {

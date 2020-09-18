@@ -62,7 +62,16 @@ pub fn update_and_render(
             render_menu(&mut canvas, fonts, &world.menu);
         }
         game::State::Play | game::State::GameOver => {
-            game::update(event, world);
+            match game::update(event, world) {
+                game::State::Paused => {
+                    world.state = game::State::Paused;
+                    world.menu.items =
+                        menu::paused_menu_items(world.menu.music_toggle, world.menu.music_volume);
+                    world.menu.item_selected = 0;
+                    world.menu.title = "Paused".to_string();
+                }
+                _ => {}
+            }
             render_game(&mut canvas, fonts, &world.game);
         }
 
