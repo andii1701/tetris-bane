@@ -185,8 +185,7 @@ pub fn update(event: &Option<Input>, world: &mut World) -> State {
         // Having the game over state allows the player to
         // soak briefly in thier defeat. Rather then a sudden loss.
         if world.state == State::GameOver {
-            world.state = State::Menu;
-            return state;
+            return State::Menu;
         }
 
         // NOTE: We want to handle the case when the block has finished falling in
@@ -198,10 +197,7 @@ pub fn update(event: &Option<Input>, world: &mut World) -> State {
 
             let spawned_block = block::spawn(&game.modes[game.mode_selected]);
             if !positions_empty_on_board(&spawned_block.positions, &game.board) {
-                world.state = State::GameOver;
-                world.menu.items =
-                    menu::menu_items(&game, world.menu.music_toggle, world.menu.music_volume);
-                world.menu.item_selected = 0;
+                state = State::GameOver;
                 game.fall_rate_millis = GAME_OVER_PAUSE;
             } else {
                 game.block = spawned_block;

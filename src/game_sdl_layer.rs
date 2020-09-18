@@ -70,6 +70,18 @@ pub fn update_and_render(
                     world.menu.item_selected = 0;
                     world.menu.title = "Paused".to_string();
                 }
+                game::State::Menu => {
+                    world.state = game::State::Menu;
+                }
+                game::State::GameOver => {
+                    world.menu.items = menu::menu_items(
+                        &world.game,
+                        world.menu.music_toggle,
+                        world.menu.music_volume,
+                    );
+                    world.menu.item_selected = 0;
+                    world.state = game::State::GameOver;
+                }
                 _ => {}
             }
             render_game(&mut canvas, fonts, &world.game);
