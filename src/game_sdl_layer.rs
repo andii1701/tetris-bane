@@ -63,14 +63,14 @@ pub fn update_and_render(
         }
         game::State::Play | game::State::GameOver => {
             game::update(event, world);
-            render_game(&mut canvas, fonts, &world);
+            render_game(&mut canvas, fonts, &world.game);
         }
 
         game::State::Quit => {}
     }
 }
 
-fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, world: &game::World) {
+fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, game: &game::Game) {
     // render
     canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
@@ -81,8 +81,8 @@ fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, world: &game::World
         (canvas_height as f32 / 2.) as i32,
     );
 
-    let board_width = (BLOCK_SIZE + GAP) * world.board[0].len() as i32;
-    let board_height = (BLOCK_SIZE + GAP) * world.board.len() as i32;
+    let board_width = (BLOCK_SIZE + GAP) * game.board[0].len() as i32;
+    let board_height = (BLOCK_SIZE + GAP) * game.board.len() as i32;
     let board_origin = Point::new(
         canvas_mid.x - (board_width as f32 / 2.) as i32,
         canvas_mid.y - (board_height as f32 / 2.) as i32,
@@ -90,9 +90,9 @@ fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, world: &game::World
     // Draw board
     {
         // Don't draw the top row
-        (1..world.board.len()).for_each(|y| {
-            (0..world.board[0].len()).for_each(|x| {
-                match world.board[y as usize][x as usize] {
+        (1..game.board.len()).for_each(|y| {
+            (0..game.board[0].len()).for_each(|x| {
+                match game.board[y as usize][x as usize] {
                     Some(color) => canvas.set_draw_color(game_color_to_sdl_color(color)),
                     None => canvas.set_draw_color(BOARD_COLOR),
                 }
@@ -109,10 +109,9 @@ fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, world: &game::World
     }
     // Draw active block on the board
     {
-        canvas.set_draw_color(game_color_to_sdl_color(world.block.color));
+        canvas.set_draw_color(game_color_to_sdl_color(game.block.color));
 
-        world
-            .block
+        game.block
             .positions
             .iter()
             .filter(|p| p.y != 0) // Don't draw if on the top row
@@ -133,7 +132,7 @@ fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, world: &game::World
         let texture_creator = canvas.texture_creator();
         let font_surface = fonts
             .score
-            .render(&format!("{}", world.score))
+            .render(&format!("{}", game.score))
             .blended(DEFAULT_TEXT_COLOR)
             .unwrap();
         let texture = font_surface.as_texture(&texture_creator).unwrap();

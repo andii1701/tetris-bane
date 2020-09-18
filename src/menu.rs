@@ -113,7 +113,7 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
                     Item::Play { .. } => {
                         world.state = game::State::Play;
                         world.music_file = sound::music_path(&menu.modes[menu.mode_selected]);
-                        game::initialise_game(&mut world);
+                        world.game = game::initialise_game(&menu.modes[menu.mode_selected]);
                     }
                     Item::EndGame { .. } => {
                         world.state = game::State::Menu;

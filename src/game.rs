@@ -88,71 +88,71 @@ impl Add for Position {
 }
 
 pub struct World {
+    pub game: Game,
+    pub menu: menu::Menu,
+    pub state: State,
+    pub music_file: String,
+}
+
+pub struct Game {
     pub block: block::Block,
     pub block_orientation: u8,
     pub board: Board,
     pub fall_rate_millis: u128, // elapsed ms before blocks drop to next row
     pub block_drop_clock: time::Instant,
     pub score: i32,
-    pub menu: menu::Menu,
-    pub state: State,
-    pub music_file: String,
 }
 
 pub fn initialise_world() -> World {
     let menu = menu::initialise();
     World {
-        board: Vec::new(),
-        block: block::spawn(&menu.modes[menu.mode_selected]),
-        block_orientation: 0,
-        fall_rate_millis: DEFAULT_FALL_RATE,
-        block_drop_clock: time::Instant::now(),
-        score: 0,
+        game: initialise_game(&menu.modes[menu.mode_selected]),
         menu: menu,
         state: State::Menu,
         music_file: "".to_string(),
     }
 }
 
-pub fn initialise_game(world: &mut World) {
-    let board_size = match world.menu.modes[world.menu.mode_selected] {
+pub fn initialise_game(mode: &Mode) -> Game {
+    let board_size = match mode {
         Mode::Bane { label: _ } => BANE_BOARD_SIZE,
         Mode::Classic { label: _ } | Mode::Chill { label: _ } => CLASSIC_BOARD_SIZE,
     };
 
-    world.board = vec![vec![None; board_size.x as usize]; board_size.y as usize];
-    world.block = block::spawn(&world.menu.modes[world.menu.mode_selected]);
-    world.block_drop_clock = time::Instant::now();
-    world.fall_rate_millis = DEFAULT_FALL_RATE;
-    world.score = 0;
-    world.block_orientation = 0;
+    Game {
+        board: vec![vec![None; board_size.x as usize]; board_size.y as usize],
+        block: block::spawn(&mode),
+        block_drop_clock: time::Instant::now(),
+        fall_rate_millis: DEFAULT_FALL_RATE,
+        score: 0,
+        block_orientation: 0,
+    }
 }
 
 pub fn update(event: &Option<Input>, world: &mut World) {
+    let mut game = &mut world.game;
     if let Some(event) = event {
         match event {
             // NOTE: DownKeyUp needs to be first in the match call otherwise
             // the DownKeyUp event will be missed if the user is holding down
             // another key.
             Input::SKeyUp | Input::SpaceKeyUp | Input::DownKeyUp => {
-                world.fall_rate_millis = DEFAULT_FALL_RATE;
+                game.fall_rate_millis = DEFAULT_FALL_RATE;
             }
             Input::LeftKeyDown => {
-                world.block.positions =
-                    move_block(&world.block, &world.board, Delta { y: 0, x: -1 });
+                game.block.positions = move_block(&game.block, &game.board, Delta { y: 0, x: -1 });
             }
             Input::RightKeyDown => {
-                world.block.positions =
-                    move_block(&world.block, &world.board, Delta { y: 0, x: 1 });
+                game.block.positions = move_block(&game.block, &game.board, Delta { y: 0, x: 1 });
             }
             Input::UpKeyDown => {
                 let (positions, orientation) =
-                    rotate_block(&world.block, &world.board, world.block_orientation);
-                world.block.positions = positions;
-                world.block_orientation = orientation;
+                    rotate_block(&game.block, &game.board, game.block_orientation);
+                game.block.positions = positions;
+                game.block_orientation = orientation;
             }
             Input::DownKeyDown | Input::SpaceKeyDown | Input::SKeyDown => {
-                world.fall_rate_millis = FAST_FALL_RATE;
+                game.fall_rate_millis = FAST_FALL_RATE;
             }
             Input::EscKeyDown | Input::PKeyDown => {
                 world.state = State::Paused;
@@ -165,8 +165,8 @@ pub fn update(event: &Option<Input>, world: &mut World) {
         }
     }
 
-    if world.block_drop_clock.elapsed().as_millis() > world.fall_rate_millis {
-        world.block_drop_clock = time::Instant::now();
+    if game.block_drop_clock.elapsed().as_millis() > game.fall_rate_millis {
+        game.block_drop_clock = time::Instant::now();
 
         // Having the game over state allows the player to
         // soak briefly in thier defeat. Rather then a sudden loss.
@@ -179,11 +179,11 @@ pub fn update(event: &Option<Input>, world: &mut World) {
         // the elapsed time. As this gives the player a chance
         // to quickly move the block at the last split second and "wedge" it into
         // gaps.
-        if has_block_finished_falling(&world.board, &world.block) {
-            world.board = paint_positions(&world.board, &world.block.positions, world.block.color);
+        if has_block_finished_falling(&game.board, &game.block) {
+            game.board = paint_positions(&game.board, &game.block.positions, game.block.color);
 
             let spawned_block = block::spawn(&world.menu.modes[world.menu.mode_selected]);
-            if !positions_empty_on_board(&spawned_block.positions, &world.board) {
+            if !positions_empty_on_board(&spawned_block.positions, &game.board) {
                 world.state = State::GameOver;
                 world.menu.items = menu::menu_items(
                     &world.menu.modes,
@@ -192,19 +192,19 @@ pub fn update(event: &Option<Input>, world: &mut World) {
                     world.menu.music_volume,
                 );
                 world.menu.item_selected = 0;
-                world.fall_rate_millis = GAME_OVER_PAUSE;
+                game.fall_rate_millis = GAME_OVER_PAUSE;
             } else {
-                world.block = spawned_block;
-                world.block_orientation = 0;
-                world.fall_rate_millis = DEFAULT_FALL_RATE;
+                game.block = spawned_block;
+                game.block_orientation = 0;
+                game.fall_rate_millis = DEFAULT_FALL_RATE;
             }
-            let (board, score) = delete_full_lines(&world.board);
-            world.board = board;
-            world.score += score;
+            let (board, score) = delete_full_lines(&game.board);
+            game.board = board;
+            game.score += score;
             return;
         }
         // Move block one square down.
-        world.block.positions = move_block(&world.block, &world.board, Delta { y: 1, x: 0 });
+        game.block.positions = move_block(&game.block, &game.board, Delta { y: 1, x: 0 });
     }
 }
 
