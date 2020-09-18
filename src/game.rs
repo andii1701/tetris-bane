@@ -101,19 +101,36 @@ pub struct Game {
     pub fall_rate_millis: u128, // elapsed ms before blocks drop to next row
     pub block_drop_clock: time::Instant,
     pub score: i32,
+    pub modes: Vec<Mode>,
+    pub mode_selected: usize,
 }
 
 pub fn initialise_world() -> World {
-    let menu = menu::initialise();
+    let game = initialise_game(0);
+    let menu = menu::initialise(&game);
     World {
-        game: initialise_game(&menu.modes[menu.mode_selected]),
+        game: game,
         menu: menu,
         state: State::Menu,
         music_file: "".to_string(),
     }
 }
 
-pub fn initialise_game(mode: &Mode) -> Game {
+pub fn initialise_game(mode_selected: usize) -> Game {
+    let modes = vec![
+        Mode::Bane {
+            label: "Bane".to_string(),
+        },
+        Mode::Classic {
+            label: "Classic".to_string(),
+        },
+        Mode::Chill {
+            label: "Chill".to_string(),
+        },
+    ];
+
+    let mode = &modes[mode_selected];
+
     let board_size = match mode {
         Mode::Bane { label: _ } => BANE_BOARD_SIZE,
         Mode::Classic { label: _ } | Mode::Chill { label: _ } => CLASSIC_BOARD_SIZE,
@@ -126,6 +143,8 @@ pub fn initialise_game(mode: &Mode) -> Game {
         fall_rate_millis: DEFAULT_FALL_RATE,
         score: 0,
         block_orientation: 0,
+        modes: modes,
+        mode_selected: mode_selected,
     }
 }
 
@@ -177,15 +196,11 @@ pub fn update(event: &Option<Input>, world: &mut World) -> State {
         if has_block_finished_falling(&game.board, &game.block) {
             game.board = paint_positions(&game.board, &game.block.positions, game.block.color);
 
-            let spawned_block = block::spawn(&world.menu.modes[world.menu.mode_selected]);
+            let spawned_block = block::spawn(&game.modes[game.mode_selected]);
             if !positions_empty_on_board(&spawned_block.positions, &game.board) {
                 world.state = State::GameOver;
-                world.menu.items = menu::menu_items(
-                    &world.menu.modes,
-                    world.menu.mode_selected,
-                    world.menu.music_toggle,
-                    world.menu.music_volume,
-                );
+                world.menu.items =
+                    menu::menu_items(&game, world.menu.music_toggle, world.menu.music_volume);
                 world.menu.item_selected = 0;
                 game.fall_rate_millis = GAME_OVER_PAUSE;
             } else {
