@@ -1,6 +1,4 @@
 // TODO
-// licenses, external and mine
-// Tidy up menu code
 // Profile menu and see why its chewing up so much cpu
 // wasm
 // Menu works with mouse
