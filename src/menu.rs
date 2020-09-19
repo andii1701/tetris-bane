@@ -79,8 +79,8 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
 
     if let Some(event) = event {
         match event {
-            game::Input::LeftKeyDown => shift_left_or_right(&mut world, -1),
-            game::Input::RightKeyDown => shift_left_or_right(&mut world, 1),
+            game::Input::LeftKeyDown => shift_left_or_right(&mut menu, &mut world.game, -1),
+            game::Input::RightKeyDown => shift_left_or_right(&mut menu, &mut world.game, 1),
             game::Input::UpKeyDown => {
                 menu.item_selected = change_index_wrapped(menu.item_selected, -1, menu.items.len());
             }
@@ -106,7 +106,7 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
                         world.menu.title = GAME_TITLE.to_string();
                     }
                     Item::Quit { .. } => world.state = game::State::Quit,
-                    Item::Mode { .. } => shift_left_or_right(&mut world, -1),
+                    Item::Mode { .. } => shift_left_or_right(&mut menu, &mut world.game, -1),
                     Item::Music { .. } => {
                         menu.music_toggle = !menu.music_toggle;
                         menu.items[menu.item_selected] = Item::Music {
@@ -128,29 +128,27 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
     }
 }
 
-fn shift_left_or_right(mut world: &mut game::World, delta: i32) {
-    match world.menu.items[world.menu.item_selected] {
+fn shift_left_or_right(mut menu: &mut Menu, mut game: &mut game::Game, delta: i32) {
+    match menu.items[menu.item_selected] {
         Item::Mode { .. } => {
-            world.game.mode_selected =
-                change_index_wrapped(world.game.mode_selected, delta, world.game.modes.len());
-            world.menu.items[world.menu.item_selected] =
-                build_mode_item(&world.game.modes, world.game.mode_selected);
+            game.mode_selected = change_index_wrapped(game.mode_selected, delta, game.modes.len());
+            menu.items[menu.item_selected] = build_mode_item(&game.modes, game.mode_selected);
         }
         Item::Music { .. } => {
-            world.menu.music_toggle = !world.menu.music_toggle;
-            world.menu.items[world.menu.item_selected] = Item::Music {
-                label: music_label(world.menu.music_toggle),
+            menu.music_toggle = !menu.music_toggle;
+            menu.items[menu.item_selected] = Item::Music {
+                label: music_label(menu.music_toggle),
             }
         }
         Item::MusicVolume { .. } => {
-            let volume = world.menu.music_volume + delta * 10;
-            world.menu.music_volume = match volume {
+            let volume = menu.music_volume + delta * 10;
+            menu.music_volume = match volume {
                 volume if volume < 0 => 0,
                 volume if volume > 128 => 128,
                 _ => volume,
             };
-            world.menu.items[world.menu.item_selected] = Item::MusicVolume {
-                label: volume_label(world.menu.music_volume),
+            menu.items[menu.item_selected] = Item::MusicVolume {
+                label: volume_label(menu.music_volume),
             };
         }
 
