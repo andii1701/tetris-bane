@@ -1,12 +1,31 @@
 # Tetris Bane
 
-A Tetris clone, with a couple of twists. Written in Rust using SDL.
+A Tetris clone with a couple of twists. Written in Rust using SDL. By Andrew Jones.
 
-# How to build
+![Image of Classic Mode](https://github.com/andii1701/tetris-bane/blob/master/assets/screenshots/classic_mode.png)
 
-TODO
+# Requirments
 
-# Kevin Macleod licenses:
+* Rust development environment: https://www.rust-lang.org/learn/get-started
+
+* SDL libaries:
+
+ - MacOS:
+ ```sh
+ brew install sdl2 sdl2_mixer sdl2_ttf
+ ```
+
+ For other platforms please see the [SDL page](https://www.libsdl.org/download-2.0.php) or your platform's package manager. SDL2, SDL2_mixer and SDL2_ttf are required.
+
+- Compile and run:
+
+```sh
+cargo run --release
+```
+
+Enjoy!
+
+# Music Attribution
 
 A Very Brady Special by Kevin MacLeod
 Link: https://filmmusic.io/song/5760-a-very-brady-special
