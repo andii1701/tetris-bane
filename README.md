@@ -1,23 +1,26 @@
 # Tetris Bane
 
-A Tetris clone with a couple of twists. Written in Rust using SDL. By Andrew Jones.
+A Tetris clone with a couple of twists. Written in Rust using SDL.
+
+By Andrew Jones.
 
 ![Image of Classic Mode](./assets/screenshots/classic_mode.png)
 
-# Requirments
+## Requirments
 
 * Rust development environment: https://www.rust-lang.org/learn/get-started
+* SDL libaries
 
-* SDL libaries:
+    * MacOS:
 
- - MacOS:
- ```sh
- brew install sdl2 sdl2_mixer sdl2_ttf
- ```
+        ```sh
+        brew install sdl2 sdl2_mixer sdl2_ttf
+        ```
 
- For other platforms please see the [SDL page](https://www.libsdl.org/download-2.0.php) or your platform's package manager. SDL2, SDL2_mixer and SDL2_ttf are required.
+   * For other platforms please see the [SDL page](https://www.libsdl.org/download-2.0.php) or your platform's package manager. SDL2, SDL2_mixer and SDL2_ttf are required.
 
-- Compile and run:
+
+## Compile and run
 
 ```sh
 cargo run --release
@@ -25,8 +28,9 @@ cargo run --release
 
 Enjoy!
 
-# Music Attribution
+## Music Attribution
 
+```
 A Very Brady Special by Kevin MacLeod
 Link: https://filmmusic.io/song/5760-a-very-brady-special
 License: http://creativecommons.org/licenses/by/4.0/
@@ -38,3 +42,4 @@ License: http://creativecommons.org/licenses/by/4.0/
 Ghost Dance by Kevin MacLeod
 Link: https://incompetech.filmmusic.io/song/3802-ghost-dance
 License: http://creativecommons.org/licenses/by/4.0/
+```
