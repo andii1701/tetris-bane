@@ -139,7 +139,7 @@ fn shift_left_or_right(mut menu: &mut Menu, game: &game::Game, delta: i32) -> us
     match menu.items[menu.item_selected] {
         Item::Mode { .. } => {
             mode_selected = change_index_wrapped(game.mode_selected, delta, game.modes.len());
-            menu.items[menu.item_selected] = build_mode_item(&game.modes, game.mode_selected);
+            menu.items[menu.item_selected] = build_mode_item(&game.modes, mode_selected);
         }
         Item::Music { .. } => {
             menu.music_toggle = !menu.music_toggle;
