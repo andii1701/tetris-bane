@@ -2,7 +2,7 @@
 
 A Tetris clone with a couple of twists. Written in Rust using SDL. By Andrew Jones.
 
-![Image of Classic Mode](https://github.com/andii1701/tetris-bane/blob/master/assets/screenshots/classic_mode.png)
+![Image of Classic Mode](./assets/screenshots/classic_mode.png)
 
 # Requirments
 
