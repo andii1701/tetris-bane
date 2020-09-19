@@ -76,14 +76,15 @@ pub fn paused_menu_items(music_toggle: bool, music_volume: i32) -> Vec<Item> {
 
 pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
     let mut menu = &mut world.menu;
+    let mut game = &mut world.game;
 
     if let Some(event) = event {
         match event {
             game::Input::LeftKeyDown => {
-                world.game.mode_selected = shift_left_or_right(&mut menu, &world.game, -1)
+                game.mode_selected = shift_left_or_right(&mut menu, &game, -1)
             }
             game::Input::RightKeyDown => {
-                world.game.mode_selected = shift_left_or_right(&mut menu, &world.game, 1)
+                game.mode_selected = shift_left_or_right(&mut menu, &game, 1)
             }
             game::Input::UpKeyDown => {
                 menu.item_selected = change_index_wrapped(menu.item_selected, -1, menu.items.len());
@@ -95,23 +96,22 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
                 match menu.items[menu.item_selected] {
                     Item::Play { .. } => {
                         world.state = game::State::Play;
-                        world.music_file =
-                            sound::music_path(&world.game.modes[world.game.mode_selected]);
-                        world.game = game::initialise_game(world.game.mode_selected);
+                        world.music_file = sound::music_path(&game.modes[game.mode_selected]);
+                        *game = game::initialise_game(game.mode_selected);
                     }
                     Item::EndGame { .. } => {
                         world.state = game::State::Menu;
                         menu.item_selected = 0;
-                        menu.items = menu_items(&world.game, menu.music_toggle, menu.music_volume);
-                        world.menu.title = GAME_TITLE.to_string();
+                        menu.items = menu_items(&game, menu.music_toggle, menu.music_volume);
+                        menu.title = GAME_TITLE.to_string();
                     }
                     Item::Resume { .. } => {
                         world.state = game::State::Play;
-                        world.menu.title = GAME_TITLE.to_string();
+                        menu.title = GAME_TITLE.to_string();
                     }
                     Item::Quit { .. } => world.state = game::State::Quit,
                     Item::Mode { .. } => {
-                        world.game.mode_selected = shift_left_or_right(&mut menu, &world.game, -1)
+                        game.mode_selected = shift_left_or_right(&mut menu, &game, -1)
                     }
                     Item::Music { .. } => {
                         menu.music_toggle = !menu.music_toggle;
