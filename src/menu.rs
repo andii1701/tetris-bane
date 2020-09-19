@@ -79,8 +79,12 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
 
     if let Some(event) = event {
         match event {
-            game::Input::LeftKeyDown => shift_left_or_right(&mut menu, &mut world.game, -1),
-            game::Input::RightKeyDown => shift_left_or_right(&mut menu, &mut world.game, 1),
+            game::Input::LeftKeyDown => {
+                world.game.mode_selected = shift_left_or_right(&mut menu, &world.game, -1)
+            }
+            game::Input::RightKeyDown => {
+                world.game.mode_selected = shift_left_or_right(&mut menu, &world.game, 1)
+            }
             game::Input::UpKeyDown => {
                 menu.item_selected = change_index_wrapped(menu.item_selected, -1, menu.items.len());
             }
@@ -106,7 +110,9 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
                         world.menu.title = GAME_TITLE.to_string();
                     }
                     Item::Quit { .. } => world.state = game::State::Quit,
-                    Item::Mode { .. } => shift_left_or_right(&mut menu, &mut world.game, -1),
+                    Item::Mode { .. } => {
+                        world.game.mode_selected = shift_left_or_right(&mut menu, &world.game, -1)
+                    }
                     Item::Music { .. } => {
                         menu.music_toggle = !menu.music_toggle;
                         menu.items[menu.item_selected] = Item::Music {
@@ -128,10 +134,11 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
     }
 }
 
-fn shift_left_or_right(mut menu: &mut Menu, mut game: &mut game::Game, delta: i32) {
+fn shift_left_or_right(mut menu: &mut Menu, game: &game::Game, delta: i32) -> usize {
+    let mut mode_selected = game.mode_selected;
     match menu.items[menu.item_selected] {
         Item::Mode { .. } => {
-            game.mode_selected = change_index_wrapped(game.mode_selected, delta, game.modes.len());
+            mode_selected = change_index_wrapped(game.mode_selected, delta, game.modes.len());
             menu.items[menu.item_selected] = build_mode_item(&game.modes, game.mode_selected);
         }
         Item::Music { .. } => {
@@ -154,6 +161,7 @@ fn shift_left_or_right(mut menu: &mut Menu, mut game: &mut game::Game, delta: i3
 
         _ => {}
     }
+    mode_selected
 }
 
 fn change_index_wrapped(index: usize, delta: i32, length: usize) -> usize {
