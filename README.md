@@ -1,10 +1,14 @@
 # Tetris Bane
 
-A Tetris clone with a couple of twists. Written in Rust using SDL.
+_You'll yern for the regular tetris blocks._
+
+**Tetris Bane** A Tetris clone with a deliberately frustrating set of blocks. There's also a classic mode for the purists and even a chill mode!
+
+Written in Rust using SDL.
 
 By Andrew Jones.
 
-![Image of Classic Mode](./assets/screenshots/classic_mode.png)
+![Image of Classic Mode](./assets/screenshots/bane_mode.png)
 
 ## Requirments
 
