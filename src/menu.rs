@@ -107,7 +107,12 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
                     }
                     Item::Quit { .. } => world.state = game::State::Quit,
                     Item::Mode { .. } => shift_left_or_right(&mut world, -1),
-                    Item::Music { .. } => toggle_music(&mut menu),
+                    Item::Music { .. } => {
+                        menu.music_toggle = !menu.music_toggle;
+                        menu.items[menu.item_selected] = Item::Music {
+                            label: music_label(menu.music_toggle),
+                        }
+                    }
                     Item::MusicVolume { .. } => {}
                 }
             }
@@ -123,13 +128,6 @@ pub fn update(event: &Option<game::Input>, mut world: &mut game::World) {
     }
 }
 
-fn toggle_music(menu: &mut Menu) {
-    menu.music_toggle = !menu.music_toggle;
-    menu.items[menu.item_selected] = Item::Music {
-        label: music_label(menu.music_toggle),
-    };
-}
-
 fn shift_left_or_right(mut world: &mut game::World, delta: i32) {
     match world.menu.items[world.menu.item_selected] {
         Item::Mode { .. } => {
@@ -138,7 +136,12 @@ fn shift_left_or_right(mut world: &mut game::World, delta: i32) {
             world.menu.items[world.menu.item_selected] =
                 build_mode_item(&world.game.modes, world.game.mode_selected);
         }
-        Item::Music { .. } => toggle_music(&mut world.menu),
+        Item::Music { .. } => {
+            world.menu.music_toggle = !world.menu.music_toggle;
+            world.menu.items[world.menu.item_selected] = Item::Music {
+                label: music_label(world.menu.music_toggle),
+            }
+        }
         Item::MusicVolume { .. } => {
             let volume = world.menu.music_volume + delta * 10;
             world.menu.music_volume = match volume {

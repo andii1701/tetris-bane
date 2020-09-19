@@ -1,9 +1,8 @@
 // TODO
-// wasm
-// Profile menu and see why its chewing up so much cpu
 // licenses, external and mine
-// Move world object out of game code
 // Tidy up menu code
+// Profile menu and see why its chewing up so much cpu
+// wasm
 // Menu works with mouse
 
 use std::path::Path;
