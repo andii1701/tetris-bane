@@ -22,6 +22,8 @@ mod menu;
 mod sound;
 mod sound_sdl;
 
+use menu::GAME_TITLE;
+
 const SYSTEM_FONT_PATH: &str = "assets/fonts/Bitstream-Vera-Sans-Mono/VeraMono.ttf";
 
 const OVERLAY_FONT_SIZE: u16 = 12;
@@ -54,7 +56,7 @@ pub fn main() {
     let timer_subsystem = sdl_context.timer().unwrap();
 
     let window = video_subsystem
-        .window("rust-tetris-sdl", 1024, 768)
+        .window(GAME_TITLE, 1024, 768)
         .position_centered()
         .resizable()
         .build()

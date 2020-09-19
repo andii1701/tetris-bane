@@ -1,7 +1,7 @@
 use crate::game;
 use crate::sound;
 
-const GAME_TITLE: &str = "Tetris Bane";
+pub const GAME_TITLE: &str = "Tetris Bane";
 
 const LABEL_LENGTH: usize = 22;
 
