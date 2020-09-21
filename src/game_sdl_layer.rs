@@ -1,14 +1,18 @@
+use std::collections::HashMap;
 use std::path::Path;
 
 use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::WindowCanvas;
+use sdl2::surface::Surface;
 use sdl2::ttf::{Font, Sdl2TtfContext};
 
 use crate::game;
 use crate::menu;
 
 use crate::block;
+
+pub type SurfaceCache<'a> = HashMap<(String, Color), Surface<'a>>;
 
 const GAME_FONT_PATH: &str = "assets/fonts/muli/Muli.ttf";
 const SETTINGS_FONT_PATH: &str = "assets/fonts/JetBrainsMono-2.001/ttf/JetBrainsMono-Regular.ttf";
@@ -36,6 +40,11 @@ pub struct GameFonts<'ttf> {
     settings: Font<'ttf, 'static>,
 }
 
+pub struct Render<'a> {
+    pub canvas: WindowCanvas,
+    pub surface_cache: SurfaceCache<'a>,
+}
+
 pub fn initialise_fonts(ttf_context: &Sdl2TtfContext) -> GameFonts {
     let game_font_path: &Path = Path::new(GAME_FONT_PATH);
     let score_font = ttf_context.load_font(game_font_path, 22).unwrap();
@@ -51,7 +60,7 @@ pub fn initialise_fonts(ttf_context: &Sdl2TtfContext) -> GameFonts {
 }
 
 pub fn update_and_render(
-    mut canvas: &mut WindowCanvas,
+    mut render: &mut Render,
     fonts: &GameFonts,
     event: &Option<game::Input>,
     mut world: &mut game::World,
@@ -59,7 +68,7 @@ pub fn update_and_render(
     match world.state {
         game::State::Menu | game::State::Paused => {
             menu::update(event, &mut world);
-            render_menu(&mut canvas, fonts, &world.menu);
+            render_menu(&mut render, fonts, &world.menu);
         }
         game::State::Play | game::State::GameOver => {
             match game::update(event, &mut world.game, &world.state) {
@@ -84,7 +93,7 @@ pub fn update_and_render(
                 }
                 _ => {}
             }
-            render_game(&mut canvas, fonts, &world.game);
+            render_game(&mut render.canvas, fonts, &world.game);
         }
 
         game::State::Quit => {}
@@ -167,7 +176,7 @@ fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, game: &game::Game) 
     }
 }
 
-fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) {
+fn render_menu(render: &mut Render, fonts: &GameFonts, menu: &menu::Menu) {
     let selected_text_color: Color = Color {
         r: 200,
         g: 200,
@@ -175,13 +184,11 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) 
         a: 255,
     };
 
-    // render
-    canvas.set_draw_color(Color::RGB(0, 0, 0));
-    canvas.clear();
+    render.canvas.set_draw_color(Color::RGB(0, 0, 0));
+    render.canvas.clear();
+    let texture_creator = render.canvas.texture_creator();
 
-    let (canvas_width, canvas_height) = canvas.output_size().unwrap();
-
-    let texture_creator = canvas.texture_creator();
+    let (canvas_width, canvas_height) = render.canvas.output_size().unwrap();
 
     // Draw title
     let title_offset_from_center = 150;
@@ -199,7 +206,7 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) 
             - title_offset_from_center,
     );
     title_rect.reposition(title_origin);
-    canvas.copy(&texture, None, title_rect).unwrap();
+    render.canvas.copy(&texture, None, title_rect).unwrap();
 
     // Draw menu
     let mut text_offset = 50;
@@ -220,16 +227,27 @@ fn render_menu(canvas: &mut WindowCanvas, fonts: &GameFonts, menu: &menu::Menu) 
             | menu::Item::MusicVolume { label } => label,
         };
 
-        let font_surface = fonts.settings.render(&label).blended(color).unwrap();
+        // Rendering font is expensive so use a simple surface cache
+        if !render
+            .surface_cache
+            .contains_key(&(label.to_string(), color))
+        {
+            let font_surface = fonts.settings.render(label).blended(color).unwrap();
+            render
+                .surface_cache
+                .insert((label.to_string(), color), font_surface);
+        }
+
+        let font_surface = &render.surface_cache[&(label.to_string(), color)];
         let texture = font_surface.as_texture(&texture_creator).unwrap();
-        let mut menu_rect = font_surface.rect();
+        let mut rect = font_surface.rect();
         let menu_origin = Point::new(
-            ((canvas_width as f32 / 2.) - (menu_rect.width() as f32 / 2.)) as i32,
-            title_rect.y + title_rect.height() as i32 + text_offset,
+            ((canvas_width as f32 / 2.) - (rect.width() as f32 / 2.)) as i32,
+            title_rect.y + rect.height() as i32 + text_offset,
         );
 
-        menu_rect.reposition(menu_origin);
-        canvas.copy(&texture, None, menu_rect).unwrap();
+        rect.reposition(menu_origin);
+        render.canvas.copy(&texture, None, rect).unwrap();
         text_offset += 50;
     });
 }

@@ -3,6 +3,7 @@
 // wasm
 // Menu works with mouse
 
+use std::collections::HashMap;
 use std::path::Path;
 use std::time::Instant;
 
@@ -60,13 +61,17 @@ pub fn main() {
         .build()
         .unwrap();
 
-    let mut canvas = window
+    let canvas = window
         .into_canvas()
         .accelerated()
         .present_vsync()
         .build()
         .unwrap();
-    let texture_creator = canvas.texture_creator();
+
+    let mut render = game_sdl_layer::Render {
+        canvas: canvas,
+        surface_cache: HashMap::new(),
+    };
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut fps_string: String = " ".to_string();
@@ -141,7 +146,7 @@ pub fn main() {
             }
         }
 
-        game_sdl_layer::update_and_render(&mut canvas, &game_fonts, &input_event, &mut world);
+        game_sdl_layer::update_and_render(&mut render, &game_fonts, &input_event, &mut world);
 
         input_event = None;
 
@@ -167,11 +172,15 @@ pub fn main() {
                 .render(&fps_string)
                 .blended(fps_color(fps))
                 .unwrap();
+            let texture_creator = render.canvas.texture_creator();
             let texture = font_surface.as_texture(&texture_creator).unwrap();
-            canvas.copy(&texture, None, font_surface.rect()).unwrap();
+            render
+                .canvas
+                .copy(&texture, None, font_surface.rect())
+                .unwrap();
         }
 
-        canvas.present();
+        render.canvas.present();
 
         if show_fps && wallclock.elapsed().as_millis() > 333 {
             let end = timer_subsystem.performance_counter();
