@@ -60,7 +60,7 @@ pub fn initialise_fonts(ttf_context: &Sdl2TtfContext) -> GameFonts {
 }
 
 pub fn update_and_render(
-    mut render: &mut Render,
+    mut render: &mut Render<'static>,
     fonts: &GameFonts,
     event: &Option<game::Input>,
     mut world: &mut game::World,
@@ -176,7 +176,7 @@ fn render_game(canvas: &mut WindowCanvas, fonts: &GameFonts, game: &game::Game) 
     }
 }
 
-fn render_menu(render: &mut Render, fonts: &GameFonts, menu: &menu::Menu) {
+fn render_menu(mut render: &mut Render<'static>, fonts: &GameFonts, menu: &menu::Menu) {
     let selected_text_color: Color = Color {
         r: 200,
         g: 200,
@@ -198,6 +198,7 @@ fn render_menu(render: &mut Render, fonts: &GameFonts, menu: &menu::Menu) {
         .render(&menu.title)
         .blended(DEFAULT_TEXT_COLOR)
         .unwrap();
+
     let texture = font_surface.as_texture(&texture_creator).unwrap();
     let mut title_rect = font_surface.rect();
     let title_origin = Point::new(
@@ -228,17 +229,7 @@ fn render_menu(render: &mut Render, fonts: &GameFonts, menu: &menu::Menu) {
         };
 
         // Rendering font is expensive so use a simple surface cache
-        if !render
-            .surface_cache
-            .contains_key(&(label.to_string(), color))
-        {
-            let font_surface = fonts.settings.render(label).blended(color).unwrap();
-            render
-                .surface_cache
-                .insert((label.to_string(), color), font_surface);
-        }
-
-        let font_surface = &render.surface_cache[&(label.to_string(), color)];
+        let font_surface = surface_from_cache(&mut render, &fonts, &label, color);
         let texture = font_surface.as_texture(&texture_creator).unwrap();
         let mut rect = font_surface.rect();
         let menu_origin = Point::new(
@@ -250,6 +241,24 @@ fn render_menu(render: &mut Render, fonts: &GameFonts, menu: &menu::Menu) {
         render.canvas.copy(&texture, None, rect).unwrap();
         text_offset += 50;
     });
+}
+
+fn surface_from_cache<'a>(
+    render: &'a mut Render,
+    fonts: &GameFonts,
+    label: &String,
+    color: Color,
+) -> &'a Surface<'a> {
+    if !render
+        .surface_cache
+        .contains_key(&(label.to_string(), color))
+    {
+        let font_surface = fonts.settings.render(&label).blended(color).unwrap();
+        render
+            .surface_cache
+            .insert((label.to_string(), color), font_surface);
+    }
+    &render.surface_cache[&(label.to_string(), color)]
 }
 
 fn game_color_to_sdl_color(color: block::Color) -> Color {
