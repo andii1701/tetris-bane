@@ -1,5 +1,4 @@
 // TODO
-// Profile menu and see why its chewing up so much cpu
 // wasm
 // Menu works with mouse
 

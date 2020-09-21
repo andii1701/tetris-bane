@@ -192,13 +192,8 @@ fn render_menu(mut render: &mut Render<'static>, fonts: &GameFonts, menu: &menu:
 
     // Draw title
     let title_offset_from_center = 150;
-
-    let font_surface = fonts
-        .title
-        .render(&menu.title)
-        .blended(DEFAULT_TEXT_COLOR)
-        .unwrap();
-
+    let font_surface =
+        surface_from_cache(&mut render, &fonts.title, &menu.title, DEFAULT_TEXT_COLOR);
     let texture = font_surface.as_texture(&texture_creator).unwrap();
     let mut title_rect = font_surface.rect();
     let title_origin = Point::new(
@@ -229,7 +224,7 @@ fn render_menu(mut render: &mut Render<'static>, fonts: &GameFonts, menu: &menu:
         };
 
         // Rendering font is expensive so use a simple surface cache
-        let font_surface = surface_from_cache(&mut render, &fonts, &label, color);
+        let font_surface = surface_from_cache(&mut render, &fonts.settings, &label, color);
         let texture = font_surface.as_texture(&texture_creator).unwrap();
         let mut rect = font_surface.rect();
         let menu_origin = Point::new(
@@ -243,9 +238,9 @@ fn render_menu(mut render: &mut Render<'static>, fonts: &GameFonts, menu: &menu:
     });
 }
 
-fn surface_from_cache<'a>(
+fn surface_from_cache<'a, 'ttf>(
     render: &'a mut Render,
-    fonts: &GameFonts,
+    font: &Font<'ttf, 'static>,
     label: &String,
     color: Color,
 ) -> &'a Surface<'a> {
@@ -253,7 +248,7 @@ fn surface_from_cache<'a>(
         .surface_cache
         .contains_key(&(label.to_string(), color))
     {
-        let font_surface = fonts.settings.render(&label).blended(color).unwrap();
+        let font_surface = font.render(&label).blended(color).unwrap();
         render
             .surface_cache
             .insert((label.to_string(), color), font_surface);
