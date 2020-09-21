@@ -1,5 +1,5 @@
 [package]
-name = "rust-tetris-sdl"
+name = "tetris-bane"
 version = "0.1.0"
 authors = ["Andrew Jones <andy.larrymite@gmail.com>"]
 edition = "2018"
