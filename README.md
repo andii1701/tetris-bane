@@ -6,27 +6,21 @@ _You'll yern for the regular tetris blocks._
 
 Written in Rust using SDL.
 
-By Andrew Jones.
-
 ![Image of Classic Mode](./assets/screenshots/bane_mode.png)
 
 ## Requirments
 
-* Rust development environment: https://www.rust-lang.org/learn/get-started
-* SDL libaries
+* [Rust development environment](https://www.rust-lang.org/learn/get-started)
+* vcpkg is used to manage the dependency on sdl:
 
-    * MacOS:
-
-        ```sh
-        brew install sdl2 sdl2_mixer sdl2_ttf
-        ```
-
-   * For other platforms please see the [SDL page](https://www.libsdl.org/download-2.0.php) or your platform's package manager. SDL2, SDL2_mixer and SDL2_ttf are required.
-
+```bash
+cargo install cargo-vcpkg
+cargo vcpkg build
+```
 
 ## Compile and run
 
-```sh
+```bash
 cargo run --release
 ```
 
