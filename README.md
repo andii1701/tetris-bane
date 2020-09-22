@@ -6,7 +6,7 @@ _You'll yern for the regular tetris blocks._
 
 Written in Rust using SDL.
 
-![Image of Classic Mode](./assets/screenshots/bane_mode.png)
+![Image of Classic Mode](./web/screenshots/bane_mode.png)
 
 ## Requirments
 
