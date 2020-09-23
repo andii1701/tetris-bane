@@ -1,6 +1,6 @@
 # Tetris Bane
 
-_You'll yern for the regular tetris blocks._
+_You'll yearn for the regular tetris blocks._
 
 **Tetris Bane** A Tetris clone with a deliberately frustrating set of blocks. There's also a classic mode for the purists and even a chill mode!
 
