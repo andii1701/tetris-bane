@@ -41,3 +41,10 @@ Ghost Dance by Kevin MacLeod
 Link: https://incompetech.filmmusic.io/song/3802-ghost-dance
 License: http://creativecommons.org/licenses/by/4.0/
 ```
+
+## Win32 notes
+Building on windows for release (so the terminal does not open):
+
+```sh
+cargo rustc --release -- -Clink-args="/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
+```

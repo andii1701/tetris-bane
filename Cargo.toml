@@ -4,9 +4,14 @@ version = "0.1.0"
 authors = ["Andrew Jones <andy.larrymite@gmail.com>"]
 edition = "2018"
 description = "A Tetris clone with a deliberately frustrating set of blocks."
+license = "MIT"
+build = "build.rs"
 
 [dependencies]
 rand = "0.7.3"
+
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1"
 
 [dependencies.sdl2]
 version = "0.34.3"
