@@ -4,8 +4,6 @@ version = "0.1.0"
 authors = ["Andrew Jones <andy.larrymite@gmail.com>"]
 edition = "2018"
 description = "A Tetris clone with a deliberately frustrating set of blocks."
-license = "MIT"
-build = "build.rs"
 
 [dependencies]
 rand = "0.7.3"
@@ -13,17 +11,22 @@ rand = "0.7.3"
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1"
 
-[dependencies.sdl2]
+[target.'cfg(target_os = "linux")'.dependencies.sdl2]
+version = "0.34.3"
+default-features = false
+features = ["ttf", "mixer"]
+
+[target.'cfg(not(target_os = "linux"))'.dependencies.sdl2]
 version = "0.34.3"
 default-features = false
 features = ["ttf", "mixer", "static-link", "use-vcpkg"]
 
-[package.metadata.vcpkg]
+[target.'cfg(not(target_os = "linux"))'.package.metadata.vcpkg]
 dependencies = ["sdl2", "sdl2-ttf", "sdl2-mixer[libvorbis]"]
 git = "https://github.com/microsoft/vcpkg"
 rev = "a0518036077baa4"
 
-[package.metadata.vcpkg.target]
+[target.'cfg(not(target_os = "linux"))'.package.metadata.vcpkg.target]
 x86_64-pc-windows-msvc = { triplet = "x64-windows-static-md" }
 
 [package.metadata.bundle]

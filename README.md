@@ -18,11 +18,19 @@ cargo install cargo-vcpkg
 cargo vcpkg build
 ```
 
-## Compile and run
+## Compile and run - MacOS and Windows
 
 ```bash
 cargo run --release
 ```
+
+## Compile and run - Linux
+```bash
+rustup install nightly
+cargo +nightly -Z features=itarget run 
+```
+
+(once the -Z flag is merged into cargo stable the rustup command and +nightly won't be required.)
 
 Enjoy!
 
