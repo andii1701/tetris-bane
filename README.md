@@ -29,6 +29,10 @@ Enjoy!
 ## Music Attribution
 
 ```
+Tetris Metal
+By Chris Evans
+License: https://creativecommons.org/licenses/by/4.0/
+
 A Very Brady Special by Kevin MacLeod
 Link: https://filmmusic.io/song/5760-a-very-brady-special
 License: http://creativecommons.org/licenses/by/4.0/
