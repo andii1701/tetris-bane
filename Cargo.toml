@@ -1,9 +1,10 @@
 [package]
 name = "tetris-bane"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Andrew Jones <andy.larrymite@gmail.com>"]
 edition = "2018"
 description = "A Tetris clone with a deliberately frustrating set of blocks."
+build = "build.rs"
 
 [dependencies]
 rand = "0.7.3"
@@ -21,12 +22,12 @@ version = "0.34.3"
 default-features = false
 features = ["ttf", "mixer", "static-link", "use-vcpkg"]
 
-[target.'cfg(not(target_os = "linux"))'.package.metadata.vcpkg]
+[package.metadata.vcpkg]
 dependencies = ["sdl2", "sdl2-ttf", "sdl2-mixer[libvorbis]"]
 git = "https://github.com/microsoft/vcpkg"
 rev = "a0518036077baa4"
 
-[target.'cfg(not(target_os = "linux"))'.package.metadata.vcpkg.target]
+[package.metadata.vcpkg.target]
 x86_64-pc-windows-msvc = { triplet = "x64-windows-static-md" }
 
 [package.metadata.bundle]

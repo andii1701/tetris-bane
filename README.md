@@ -11,23 +11,25 @@ Written in Rust using SDL.
 ## Requirments
 
 * [Rust development environment](https://www.rust-lang.org/learn/get-started)
-* vcpkg is used to manage the dependency on sdl:
-
-```bash
-cargo install cargo-vcpkg
-cargo vcpkg build
-```
 
 ## Compile and run - MacOS and Windows
 
+On MacOS and Windows vcpkg is used to manage the dependency on sdl:
+
 ```bash
-cargo run --release
+rustup install nightly
+cargo install cargo-vcpkg
+cargo vcpkg build
+cargo +nightly -Z features=itarget run --release
 ```
 
 ## Compile and run - Linux
+
+On Linux pkgconfig is used to manage the dependency on sdl:
+
 ```bash
 rustup install nightly
-cargo +nightly -Z features=itarget run 
+cargo +nightly -Z features=itarget run --release
 ```
 
 (once the -Z flag is merged into cargo stable the rustup command and +nightly won't be required.)
