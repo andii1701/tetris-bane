@@ -116,6 +116,11 @@ enum Label {
     //  X
     //  X
     //  X
+    MetalA,
+    //  X
+    // X X
+    // XXX
+    // X X
 }
 
 #[derive(Clone)]
@@ -625,6 +630,49 @@ pub fn spawn(mode: &Mode) -> Block {
         },
     };
 
+    let metal_a = Block {
+        label: Label::MetalA,
+        positions: vec![
+            Position {
+                y: 0,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 2 + start_offset,
+            },
+            Position {
+                y: 2,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 2,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 2,
+                x: 2 + start_offset,
+            },
+            Position {
+                y: 3,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 3,
+                x: 2 + start_offset,
+            },
+        ],
+        color: Color {
+            r: 80,
+            g: 80,
+            b: 80,
+        },
+    };
+
     let classic_blocks = vec![
         i.clone(),
         t.clone(),
@@ -647,8 +695,8 @@ pub fn spawn(mode: &Mode) -> Block {
         bane_l.clone(),
     ];
 
-    //    metal_m.clone(), metal_e.clone()
-    let metal_blocks = vec![metal_t.clone()];
+    //    metal_m.clone(), metal_e.clone(), metal_t.clone()
+    let metal_blocks = vec![metal_a.clone()];
 
     match mode {
         Mode::Chill { .. } => chill_blocks
@@ -1103,6 +1151,52 @@ fn rotation_vectors() -> RotationMap {
                 Delta { y: 0, x: 0 },
                 Delta { y: 1, x: 1 },
                 Delta { y: 2, x: 2 },
+            ],
+        ],
+    );
+
+    vectors.insert(
+        Label::MetalA,
+        vec![
+            vec![
+                Delta { y: 2, x: -2 },
+                Delta { y: 2, x: 0 },
+                Delta { y: 0, x: -2 },
+                Delta { y: 1, x: 1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: -1, x: -1 },
+                Delta { y: 0, x: 2 },
+                Delta { y: -2, x: 0 },
+            ],
+            vec![
+                Delta { y: 2, x: 2 },
+                Delta { y: 0, x: 2 },
+                Delta { y: 2, x: 0 },
+                Delta { y: -1, x: 1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 1, x: -1 },
+                Delta { y: -2, x: 0 },
+                Delta { y: 0, x: -2 },
+            ],
+            vec![
+                Delta { y: -2, x: 2 },
+                Delta { y: -2, x: 0 },
+                Delta { y: 0, x: 2 },
+                Delta { y: -1, x: -1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 1, x: 1 },
+                Delta { y: 0, x: -2 },
+                Delta { y: 2, x: 0 },
+            ],
+            vec![
+                Delta { y: -2, x: -2 },
+                Delta { y: 0, x: -2 },
+                Delta { y: -2, x: 0 },
+                Delta { y: 1, x: -1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: -1, x: 1 },
+                Delta { y: 2, x: 0 },
+                Delta { y: 0, x: 2 },
             ],
         ],
     );
