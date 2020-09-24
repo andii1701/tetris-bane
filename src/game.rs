@@ -40,6 +40,7 @@ type Dimension = Position;
 
 pub const BANE_BOARD_SIZE: Dimension = Dimension { x: 18, y: 24 + 1 };
 pub const CLASSIC_BOARD_SIZE: Dimension = Dimension { x: 10, y: 20 + 1 };
+pub const METAL_BOARD_SIZE: Dimension = Dimension { x: 24, y: 24 + 1 };
 pub const FAST_FALL_RATE: u128 = 25; // milliseconds
 pub const DEFAULT_FALL_RATE: u128 = 500; // milliseconds
 pub const GAME_OVER_PAUSE: u128 = 1000; // milliseconds
@@ -50,6 +51,7 @@ pub enum Mode {
     Classic { label: String },
     Chill { label: String },
     Bane { label: String },
+    Metal { label: String },
 }
 
 #[derive(PartialEq, Eq)]
@@ -127,13 +129,17 @@ pub fn initialise_game(mode_selected: usize) -> Game {
         Mode::Chill {
             label: "Chill".to_string(),
         },
+        Mode::Metal {
+            label: "Metal".to_string(),
+        },
     ];
 
     let mode = &modes[mode_selected];
 
     let board_size = match mode {
-        Mode::Bane { label: _ } => BANE_BOARD_SIZE,
-        Mode::Classic { label: _ } | Mode::Chill { label: _ } => CLASSIC_BOARD_SIZE,
+        Mode::Bane { .. } => BANE_BOARD_SIZE,
+        Mode::Metal { .. } => METAL_BOARD_SIZE,
+        Mode::Classic { .. } | Mode::Chill { .. } => CLASSIC_BOARD_SIZE,
     };
 
     Game {

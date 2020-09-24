@@ -101,6 +101,11 @@ enum Label {
     BaneN,
     // XXX
     // X X
+    MetalM,
+    // X X
+    // XXX
+    // X X
+    // X X
 }
 
 #[derive(Clone)]
@@ -481,6 +486,53 @@ pub fn spawn(mode: &Mode) -> Block {
         color: ORANGE,
     };
 
+    let metal_m = Block {
+        label: Label::MetalM,
+        positions: vec![
+            Position {
+                y: 0,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 0,
+                x: 2 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 1 + start_offset,
+            },
+            Position {
+                y: 1,
+                x: 2 + start_offset,
+            },
+            Position {
+                y: 2,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 2,
+                x: 2 + start_offset,
+            },
+            Position {
+                y: 3,
+                x: 0 + start_offset,
+            },
+            Position {
+                y: 3,
+                x: 2 + start_offset,
+            },
+        ],
+        color: Color {
+            r: 100,
+            g: 100,
+            b: 100,
+        },
+    };
+
     let classic_blocks = vec![
         i.clone(),
         t.clone(),
@@ -503,16 +555,22 @@ pub fn spawn(mode: &Mode) -> Block {
         bane_l.clone(),
     ];
 
+    let metal_blocks = vec![metal_m.clone()];
+
     match mode {
-        Mode::Chill { label: _ } => chill_blocks
+        Mode::Chill { .. } => chill_blocks
             .choose(&mut rand::thread_rng())
             .unwrap()
             .clone(),
-        Mode::Classic { label: _ } => classic_blocks
+        Mode::Classic { .. } => classic_blocks
             .choose(&mut rand::thread_rng())
             .unwrap()
             .clone(),
-        Mode::Bane { label: _ } => bane_blocks.choose(&mut rand::thread_rng()).unwrap().clone(),
+        Mode::Bane { .. } => bane_blocks.choose(&mut rand::thread_rng()).unwrap().clone(),
+        Mode::Metal { .. } => metal_blocks
+            .choose(&mut rand::thread_rng())
+            .unwrap()
+            .clone(),
     }
 }
 
@@ -815,6 +873,55 @@ fn rotation_vectors() -> RotationMap {
                 Delta { y: -1, x: 1 },
                 Delta { y: 2, x: 0 },
                 Delta { y: 0, x: 2 },
+            ],
+        ],
+    );
+    vectors.insert(
+        Label::MetalM,
+        vec![
+            vec![
+                Delta { y: 2, x: 0 },
+                Delta { y: 0, x: -2 },
+                Delta { y: 1, x: 1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: -1, x: -1 },
+                Delta { y: 0, x: 2 },
+                Delta { y: -2, x: 0 },
+                Delta { y: -1, x: 3 },
+                Delta { y: -3, x: 1 },
+            ],
+            vec![
+                Delta { y: 0, x: 2 },
+                Delta { y: 2, x: 0 },
+                Delta { y: -1, x: 1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 1, x: -1 },
+                Delta { y: -2, x: 0 },
+                Delta { y: 0, x: -2 },
+                Delta { y: -3, x: -1 },
+                Delta { y: -1, x: -3 },
+            ],
+            vec![
+                Delta { y: -2, x: 0 },
+                Delta { y: 0, x: 2 },
+                Delta { y: -1, x: -1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: 1, x: 1 },
+                Delta { y: 0, x: -2 },
+                Delta { y: 2, x: 0 },
+                Delta { y: 1, x: -3 },
+                Delta { y: 3, x: -1 },
+            ],
+            vec![
+                Delta { y: 0, x: -2 },
+                Delta { y: -2, x: 0 },
+                Delta { y: 1, x: -1 },
+                Delta { y: 0, x: 0 },
+                Delta { y: -1, x: 1 },
+                Delta { y: 2, x: 0 },
+                Delta { y: 0, x: 2 },
+                Delta { y: 3, x: 1 },
+                Delta { y: 1, x: 3 },
             ],
         ],
     );

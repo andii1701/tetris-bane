@@ -186,7 +186,8 @@ fn mode_label(mode: &game::Mode) -> String {
         match mode {
             game::Mode::Classic { label }
             | game::Mode::Chill { label }
-            | game::Mode::Bane { label } => label,
+            | game::Mode::Bane { label }
+            | game::Mode::Metal { label } => label,
         }
     );
 
